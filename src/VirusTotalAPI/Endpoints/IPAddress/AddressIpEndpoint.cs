@@ -5,14 +5,14 @@ using VirusTotalAPI.Models.Analysis.IP;
 
 namespace VirusTotalAPI.Endpoints.IPAddress;
 
-public class AdressIpEndpoint : Endpoint
+public class AddressIpEndpoint : Endpoint
 {
-    public AdressIpEndpoint(string apiKey)
+    public AddressIpEndpoint(string apiKey)
     {
-        _url += "/ip_addresses";
+        Url += "/ip_addresses";
         ApiKey = apiKey;
-        var options = new RestClientOptions(_url);
-        _client = new RestClient(options);
+        var options = new RestClientOptions(Url);
+        Client = new RestClient(options);
     }
 
     public async Task<IpAnalysisResult> GetReport(string ipAddress, CancellationToken? cancellationToken)
@@ -23,11 +23,11 @@ public class AdressIpEndpoint : Endpoint
 
         if (cancellationToken is not null)
         {
-            response = await _client.ExecuteGetAsync<IpAnalysisResult>(request, cancellationToken.Value);
+            response = await Client.ExecuteGetAsync<IpAnalysisResult>(request, cancellationToken.Value);
         }
         else
         {
-            response = await _client.ExecuteGetAsync<IpAnalysisResult>(request);
+            response = await Client.ExecuteGetAsync<IpAnalysisResult>(request);
         }
 
         if (response is { IsSuccessful: true, Data: not null })
@@ -36,7 +36,9 @@ public class AdressIpEndpoint : Endpoint
         }
 
         var errorContent = response.Content!;
-        var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent)!;
+
+        var errorJsonDocument = JsonDocument.Parse(errorContent);
+        var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>()!;
         ThrowErrorResponseException(errorResponse);
         return new IpAnalysisResult();
     }

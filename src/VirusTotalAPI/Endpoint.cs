@@ -6,19 +6,20 @@ namespace VirusTotalAPI;
 
 public abstract class Endpoint
 {
-    protected RestClient _client;
-    protected string _url = "https://www.virustotal.com/api/v3";
+    protected RestClient Client;
+    protected string Url = "https://www.virustotal.com/api/v3";
+    private string _apiKey;
     protected string ApiKey
     {
-        get => ApiKey;
-        set
+        get => _apiKey;
+        init
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 throw new ArgumentException("Api key shouldn't be empty.");
             }
 
-            ApiKey = value;
+            _apiKey = value;
         }
     }
 
@@ -42,6 +43,7 @@ public abstract class Endpoint
             "TooManyRequestsError" => new TooManyRequestsException(error.Message),
             "TransientError" => new TransientException(error.Message),
             "DeadlineExceededError" => new DeadlineExceededException(error.Message),
+            "NotFoundError" => new NotFoundException(error.Message),
             _ => new Exception(error.Message)
         };
     }
