@@ -7,8 +7,7 @@ public class SslCertificate
     public required Issuer Issuer { get; set; }
     public required PublicKey PublicKey { get; set; }
     public required string SerialNumber { get; set; }
-    public required string SignatureAlgorithm { get; set; }
-    public long Size { get; set; }
+    public int Size { get; set; }
     public required Subject Subject { get; set; }
     public required string Thumbprint { get; set; }
     public required string ThumbprintSha256 { get; set; }

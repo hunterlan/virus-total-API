@@ -2,6 +2,6 @@ namespace VirusTotalAPI.Models.Certificates.SSL;
 
 public class Validity
 {
-    public DateTimeOffset NotAfter { get; set; }
-    public DateTimeOffset NotBefore { get; set; }
+    public required string NotAfter { get; set; }
+    public required string NotBefore { get; set; }
 }

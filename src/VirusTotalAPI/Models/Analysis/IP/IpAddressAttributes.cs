@@ -45,7 +45,8 @@ public class IpAddressAttributes
     
     public int? LastHttpsCertificateDate { get; set; }
     
-    public required Dictionary<string, EngineAnalysisResult> LastAnalysisResult { get; set; }
+    //TODO: Here they are played themselves, because keys starts from Uppercase, what is problem for me
+    public Dictionary<string, EngineAnalysisResult> LastAnalysisResult { get; set; }
     
     public required string RegionalInternetRegistry { get; set; }
     
