@@ -24,7 +24,7 @@ public abstract class Endpoint
     }
 
     // https://docs.virustotal.com/reference/errors
-    protected void ThrowErrorResponseException(ErrorResponse error)
+    protected static void ThrowErrorResponseException(ErrorResponse error)
     {
         throw error.Code switch
         {
