@@ -14,15 +14,13 @@ public class ErrorTest
         var settings = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
-        ApiKey = "";
+        ApiKey = settings["apiKey"];
         _endpoint = new AddressIpEndpoint(ApiKey);
     }
     
-    //https://stackoverflow.com/questions/45017295/assert-an-exception-using-xunit
     [Fact]
-    public async Task IncorrectApiKeyAssign()
+    public void IncorrectApiKeyAssign()
     {
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _endpoint.GetReport("1.1.1.1", null));
-        Assert.Equal("Api key shouldn't be empty.", exception.Message);
+        Assert.Throws<ArgumentException>(() => new AddressIpEndpoint(""));
     }
 }
