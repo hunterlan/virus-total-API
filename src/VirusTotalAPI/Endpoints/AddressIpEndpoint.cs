@@ -3,6 +3,7 @@ using RestSharp;
 using VirusTotalAPI.Models;
 using VirusTotalAPI.Models.Analysis.IP;
 using VirusTotalAPI.Models.Comments.IP;
+using VirusTotalAPI.Models.Comments.IP.Add;
 
 namespace VirusTotalAPI.Endpoints;
 
@@ -26,26 +27,13 @@ public class AddressIpEndpoint : Endpoint
     {
         var request = new RestRequest($"/{ipAddress}").AddHeader("x-apikey", ApiKey);
 
-        RestResponse restResponse;
+        var restResponse = await GetResponse(request, cancellationToken);
 
-        if (cancellationToken is not null)
-        {
-            restResponse = await Client.ExecuteGetAsync(request, cancellationToken.Value);
-        }
-        else
-        {
-            restResponse = await Client.ExecuteGetAsync(request);
-        }
-
-        if (restResponse is { IsSuccessful: true})
-        {
-            var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-            var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(_jsonSerializerOptions)!;
-            return result;
-        }
-
-        HandleError(restResponse.Content!);
-        return new IpAnalysisResult();
+        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
+        
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(_jsonSerializerOptions)!;
+        return result;
     }
 
     public async Task<IpComment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken, int limits = 10)
@@ -58,33 +46,65 @@ public class AddressIpEndpoint : Endpoint
         }
 
         var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
-        
-        RestResponse restResponse;
 
-        if (cancellationToken is not null)
-        {
-            restResponse = await Client.ExecuteGetAsync(request, cancellationToken.Value);
-        }
-        else
-        {
-            restResponse = await Client.ExecuteGetAsync(request);
-        }
-        
-        if (restResponse is { IsSuccessful: true})
-        {
-            var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-            var result = resultJsonDocument.Deserialize<IpComment>(_jsonSerializerOptions)!;
-            return result;
-        }
+        var restResponse = await GetResponse(request, cancellationToken);
 
-        HandleError(restResponse.Content!);
-        return new IpComment();
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.Deserialize<IpComment>(_jsonSerializerOptions)!;
+        return result;
     }
 
-    private void HandleError(string errorContent)
+    public async Task PostComment(string ipAddress, string comment, CancellationToken? cancellationToken)
+    {
+        var newComment = new AddComment
+        {
+            Data = new Data
+            {
+                Attributes = new AddCommentAttributes
+                {
+                    Text = comment
+                }
+            }
+        };
+        var requestUrl = $"/{ipAddress}/comments";
+
+        var serializedJson = JsonSerializer.Serialize(newComment, _jsonSerializerOptions);
+        var request = new RestRequest(requestUrl)
+            .AddHeader("x-apikey", ApiKey)
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+    }
+
+    //TODO: Get objects related to an IP Address
+    
+    //TODO: Get objects descriptors related to an IP Address
+    
+    //TODO: Get votes on an IP address
+    
+    //TODO: Post vote to IP Address
+
+    private Exception HandleError(string errorContent)
     {
         var errorJsonDocument = JsonDocument.Parse(errorContent);
         var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>(_jsonSerializerOptions)!;
-        ThrowErrorResponseException(errorResponse);
+        return ThrowErrorResponseException(errorResponse);
+    }
+
+    private Task<RestResponse> GetResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        return cancellationToken is not null 
+            ? Client.ExecuteGetAsync(request, cancellationToken.Value) 
+            : Client.ExecuteGetAsync(request);
+    }
+
+    private Task<RestResponse> PostResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        return cancellationToken is not null
+            ? Client.ExecutePostAsync(request, cancellationToken.Value)
+            : Client.ExecutePostAsync(request);
     }
 }

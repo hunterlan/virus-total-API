@@ -24,9 +24,9 @@ public abstract class Endpoint
     }
 
     // https://docs.virustotal.com/reference/errors
-    protected static void ThrowErrorResponseException(ErrorResponse error)
+    protected static Exception ThrowErrorResponseException(ErrorResponse error)
     {
-        throw error.Code switch
+        return error.Code switch
         {
             "AuthenticationRequiredError" => new AuthenticationRequiredException(error.Message),
             "BadRequestError" => new BadRequestException(error.Message),
