@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\VirusTotalAPI\VirusTotalAPI.csproj" />
+      <ProjectReference Include="..\VirusTotalCore\VirusTotalCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>
