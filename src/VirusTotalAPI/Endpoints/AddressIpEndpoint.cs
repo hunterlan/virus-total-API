@@ -1,8 +1,11 @@
 using System.Text.Json;
 using RestSharp;
+using VirusTotalAPI.Enums;
+using VirusTotalAPI.Models.Add;
 using VirusTotalAPI.Models.Analysis.IP;
+using VirusTotalAPI.Models.Comments;
 using VirusTotalAPI.Models.Comments.IP;
-using VirusTotalAPI.Models.Comments.IP.Add;
+using VirusTotalAPI.Models.Shared;
 using VirusTotalAPI.Models.Votes;
 
 namespace VirusTotalAPI.Endpoints;
@@ -54,9 +57,10 @@ public class AddressIpEndpoint : Endpoint
     {
         var newComment = new AddComment
         {
-            Data = new Data
+            Data = new AddData<AddCommentAttribute>
             {
-                Attributes = new AddCommentAttributes
+                Type = "comment",
+                Attributes = new AddCommentAttribute
                 {
                     Text = comment
                 }
@@ -98,10 +102,36 @@ public class AddressIpEndpoint : Endpoint
         var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
         return result;
     }
-
-    //TODO: Post vote to IP Address
-    public void PostVote(string ipAddress)
+    
+    public async Task PostVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var userVerdict = verdict switch
+        {
+            VerdictType.Harmless => "harmless",
+            VerdictType.Malicious => "malicious",
+            _ => throw new ArgumentOutOfRangeException(nameof(verdict), verdict,
+                "The verdict attribute must have be either harmless or malicious.")
+        };
+
+        var newVote = new AddVote
+        {
+            Data = new AddData<AddVoteAttribute>
+            {
+                Type = "vote",
+                Attributes = new AddVoteAttribute
+                {
+                    Verdict = userVerdict
+                }
+            }
+        };
+
+        var requestUrl = $"/{ipAddress}/votes";
+        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
+        var request = new RestRequest(requestUrl)
+            .AddHeader("x-apikey", ApiKey)
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 }
