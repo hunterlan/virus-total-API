@@ -9,12 +9,6 @@ namespace VirusTotalAPI.Endpoints;
 
 public class AddressIpEndpoint : Endpoint
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        WriteIndented = true
-    };
     public AddressIpEndpoint(string apiKey)
     {
         Url += "/ip_addresses";
@@ -32,7 +26,7 @@ public class AddressIpEndpoint : Endpoint
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
         
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(_jsonSerializerOptions)!;
+        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(JsonSerializerOptions)!;
         return result;
     }
 
@@ -52,7 +46,7 @@ public class AddressIpEndpoint : Endpoint
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
         
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<IpComment>(_jsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<IpComment>(JsonSerializerOptions)!;
         return result;
     }
 
@@ -70,7 +64,7 @@ public class AddressIpEndpoint : Endpoint
         };
         var requestUrl = $"/{ipAddress}/comments";
 
-        var serializedJson = JsonSerializer.Serialize(newComment, _jsonSerializerOptions);
+        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
         var request = new RestRequest(requestUrl)
             .AddHeader("x-apikey", ApiKey)
             .AddJsonBody(serializedJson);
@@ -86,25 +80,4 @@ public class AddressIpEndpoint : Endpoint
     //TODO: Get votes on an IP address
     
     //TODO: Post vote to IP Address
-
-    private Exception HandleError(string errorContent)
-    {
-        var errorJsonDocument = JsonDocument.Parse(errorContent);
-        var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>(_jsonSerializerOptions)!;
-        return ThrowErrorResponseException(errorResponse);
-    }
-
-    private Task<RestResponse> GetResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        return cancellationToken is not null 
-            ? Client.ExecuteGetAsync(request, cancellationToken.Value) 
-            : Client.ExecuteGetAsync(request);
-    }
-
-    private Task<RestResponse> PostResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        return cancellationToken is not null
-            ? Client.ExecutePostAsync(request, cancellationToken.Value)
-            : Client.ExecutePostAsync(request);
-    }
 }

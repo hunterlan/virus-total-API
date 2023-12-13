@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using System.Text.Json;
+using RestSharp;
 using VirusTotalAPI.Exceptions;
 using VirusTotalAPI.Models;
 
@@ -22,6 +23,13 @@ public abstract class Endpoint
             _apiKey = value;
         }
     }
+    
+    protected readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        WriteIndented = true
+    };
 
     // https://docs.virustotal.com/reference/errors
     protected static Exception ThrowErrorResponseException(ErrorResponse error)
@@ -46,5 +54,26 @@ public abstract class Endpoint
             "NotFoundError" => new NotFoundException(error.Message),
             _ => new Exception(error.Message)
         };
+    }
+    
+    protected Exception HandleError(string errorContent)
+    {
+        var errorJsonDocument = JsonDocument.Parse(errorContent);
+        var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>(JsonSerializerOptions)!;
+        return ThrowErrorResponseException(errorResponse);
+    }
+
+    protected Task<RestResponse> GetResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        return cancellationToken is not null 
+            ? Client.ExecuteGetAsync(request, cancellationToken.Value) 
+            : Client.ExecuteGetAsync(request);
+    }
+
+    protected Task<RestResponse> PostResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        return cancellationToken is not null
+            ? Client.ExecutePostAsync(request, cancellationToken.Value)
+            : Client.ExecutePostAsync(request);
     }
 }
