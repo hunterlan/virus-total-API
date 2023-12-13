@@ -18,7 +18,7 @@ public class ErrorTest
         ApiKey = settings["apiKey"]!;
         _endpoint = new AddressIpEndpoint(ApiKey);
     }
-    
+
     [Fact]
     public void IncorrectApiKeyAssign()
     {

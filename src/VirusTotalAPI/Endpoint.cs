@@ -23,7 +23,7 @@ public abstract class Endpoint
             _apiKey = value;
         }
     }
-    
+
     protected readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -55,7 +55,7 @@ public abstract class Endpoint
             _ => new Exception(error.Message)
         };
     }
-    
+
     protected Exception HandleError(string errorContent)
     {
         var errorJsonDocument = JsonDocument.Parse(errorContent);
@@ -65,8 +65,8 @@ public abstract class Endpoint
 
     protected Task<RestResponse> GetResponse(RestRequest request, CancellationToken? cancellationToken)
     {
-        return cancellationToken is not null 
-            ? Client.ExecuteGetAsync(request, cancellationToken.Value) 
+        return cancellationToken is not null
+            ? Client.ExecuteGetAsync(request, cancellationToken.Value)
             : Client.ExecuteGetAsync(request);
     }
 

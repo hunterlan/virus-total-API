@@ -24,7 +24,7 @@ public class AddressIpEndpoint : Endpoint
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-        
+
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(JsonSerializerOptions)!;
         return result;
@@ -44,7 +44,7 @@ public class AddressIpEndpoint : Endpoint
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-        
+
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var result = resultJsonDocument.Deserialize<IpComment>(JsonSerializerOptions)!;
         return result;
@@ -78,22 +78,22 @@ public class AddressIpEndpoint : Endpoint
     {
         throw new NotImplementedException();
     }
-    
+
     //TODO: Get objects descriptors related to an IP Address
     public void GetRelatedDescriptors(string ipAddress)
     {
         throw new NotImplementedException();
     }
-    
+
     public async Task<Vote> GetVotes(string ipAddress, CancellationToken? cancellationToken)
     {
         var requestUrl = $"/{ipAddress}/votes";
-        
+
         var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-        
+
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
         return result;
