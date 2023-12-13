@@ -1,3 +1,5 @@
+using VirusTotalCore.Models.Certificates.SSL;
+
 namespace VirusTotalAPI.Models.Certificates.SSL;
 
 public class SslCertificate

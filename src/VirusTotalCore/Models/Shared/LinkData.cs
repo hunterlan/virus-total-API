@@ -1,7 +1,7 @@
-﻿namespace VirusTotalAPI.Models.Shared;
+﻿namespace VirusTotalCore.Models.Shared;
 
 public class LinkData
 {
-    public Uri Next { get; set; }
-    public Uri Self { get; set; }
+    public Uri? Next { get; set; }
+    public required Uri Self { get; set; }
 }

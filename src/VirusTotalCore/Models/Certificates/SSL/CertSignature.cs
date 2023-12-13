@@ -1,7 +1,7 @@
-namespace VirusTotalAPI.Models.Certificates.SSL;
+namespace VirusTotalCore.Models.Certificates.SSL;
 
 public class CertSignature
 {
-    public string Signature { get; set; }
-    public string SignatureAlgorithm { get; set; }
+    public required string Signature { get; set; }
+    public required string SignatureAlgorithm { get; set; }
 }

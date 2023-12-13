@@ -1,6 +1,6 @@
-namespace VirusTotalAPI.Models.Certificates.SSL;
+namespace VirusTotalCore.Models.Certificates.SSL;
 
 public class AuthorityKeyIdentifier
 {
-    public string Keyid { get; set; }
+    public required string Keyid { get; set; }
 }

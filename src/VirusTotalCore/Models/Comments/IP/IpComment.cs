@@ -2,5 +2,5 @@
 
 public class IpComment : BaseComment
 {
-    public IpCommentsData[] Data { get; set; }
+    public required IpCommentsData[] Data { get; set; }
 }

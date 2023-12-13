@@ -7,6 +7,8 @@ using VirusTotalAPI.Models.Comments;
 using VirusTotalAPI.Models.Comments.IP;
 using VirusTotalAPI.Models.Shared;
 using VirusTotalAPI.Models.Votes;
+using VirusTotalCore;
+using VirusTotalCore.Models.Analysis.IP;
 
 namespace VirusTotalAPI.Endpoints;
 

@@ -1,7 +1,7 @@
-namespace VirusTotalAPI.Models.Certificates.SSL;
+namespace VirusTotalCore.Models.Certificates.SSL;
 
 public class PublicKey
 {
-    public string Algorithm { get; set; }
-    public Rsa Rsa { get; set; }
+    public required string Algorithm { get; set; }
+    public required Rsa Rsa { get; set; }
 }

@@ -1,6 +1,6 @@
-namespace VirusTotalAPI.Models.Certificates.SSL;
+namespace VirusTotalCore.Models.Certificates.SSL;
 
 public class Subject
 {
-    public string Cn { get; set; }
+    public required string Cn { get; set; }
 }

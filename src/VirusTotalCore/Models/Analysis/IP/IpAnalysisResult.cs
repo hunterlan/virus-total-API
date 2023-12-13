@@ -1,9 +1,8 @@
-using System.Text.Json.Serialization;
+using VirusTotalAPI.Models.Analysis.IP;
 
-namespace VirusTotalAPI.Models.Analysis.IP;
+namespace VirusTotalCore.Models.Analysis.IP;
 
 public class IpAnalysisResult : AnalysisResult
 {
-    //[JsonPropertyName("attributes")]
-    public IpAddressAttributes Attributes { get; set; }
+    public required IpAddressAttributes Attributes { get; set; }
 }

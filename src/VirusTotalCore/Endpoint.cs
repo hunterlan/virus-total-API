@@ -3,13 +3,13 @@ using RestSharp;
 using VirusTotalAPI.Exceptions;
 using VirusTotalAPI.Models;
 
-namespace VirusTotalAPI;
+namespace VirusTotalCore;
 
 public abstract class Endpoint
 {
-    protected RestClient Client;
+    protected RestClient Client = null!;
     protected string Url = "https://www.virustotal.com/api/v3";
-    private string _apiKey;
+    private readonly string _apiKey = null!;
     protected string ApiKey
     {
         get => _apiKey;

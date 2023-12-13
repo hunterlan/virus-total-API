@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using VirusTotalAPI.Models.Certificates.SSL;
-using VirusTotalAPI.Models.IP;
+using VirusTotalCore.Models.Analysis.IP;
 
 namespace VirusTotalAPI.Models.Analysis.IP;
 
@@ -45,7 +45,7 @@ public class IpAddressAttributes
 
     public int? LastHttpsCertificateDate { get; set; }
 
-    public Dictionary<string, EngineAnalysisResult> LastAnalysisResults { get; set; }
+    public required Dictionary<string, EngineAnalysisResult> LastAnalysisResults { get; set; }
 
     public required string RegionalInternetRegistry { get; set; }
 

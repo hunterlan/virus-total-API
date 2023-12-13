@@ -1,6 +1,6 @@
-﻿namespace VirusTotalAPI.Models.Shared;
+﻿namespace VirusTotalCore.Models.Shared;
 
 public class AttributeLinks
 {
-    public Uri Self { get; set; }
+    public required Uri Self { get; set; }
 }

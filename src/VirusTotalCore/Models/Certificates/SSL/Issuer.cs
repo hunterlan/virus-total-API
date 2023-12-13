@@ -1,8 +1,8 @@
-namespace VirusTotalAPI.Models.Certificates.SSL;
+namespace VirusTotalCore.Models.Certificates.SSL;
 
 public class Issuer
 {
-    public string C { get; set; }
-    public string Cn { get; set; }
-    public string O { get; set; }
+    public required string C { get; set; }
+    public required string Cn { get; set; }
+    public required string O { get; set; }
 }

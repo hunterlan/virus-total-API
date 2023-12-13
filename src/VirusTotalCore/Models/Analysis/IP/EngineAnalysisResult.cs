@@ -1,10 +1,10 @@
-namespace VirusTotalAPI.Models.IP;
+namespace VirusTotalCore.Models.Analysis.IP;
 
 public class EngineAnalysisResult
 {
-    public string Category { get; set; }
+    public required string Category { get; set; }
 
-    public string Result { get; set; }
+    public required string Result { get; set; }
 
-    public string Method { get; set; }
+    public required string Method { get; set; }
 }
