@@ -1,4 +1,4 @@
-﻿namespace VirusTotalAPI.Models.Comments;
+﻿namespace VirusTotalAPI.Models.Shared;
 
 public class Meta
 {

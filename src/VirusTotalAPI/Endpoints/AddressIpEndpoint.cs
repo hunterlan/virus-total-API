@@ -1,9 +1,9 @@
 using System.Text.Json;
 using RestSharp;
-using VirusTotalAPI.Models;
 using VirusTotalAPI.Models.Analysis.IP;
 using VirusTotalAPI.Models.Comments.IP;
 using VirusTotalAPI.Models.Comments.IP.Add;
+using VirusTotalAPI.Models.Votes;
 
 namespace VirusTotalAPI.Endpoints;
 
@@ -74,10 +74,34 @@ public class AddressIpEndpoint : Endpoint
     }
 
     //TODO: Get objects related to an IP Address
+    public void GetRelatedObjects(string ipAddress)
+    {
+        throw new NotImplementedException();
+    }
     
     //TODO: Get objects descriptors related to an IP Address
+    public void GetRelatedDescriptors(string ipAddress)
+    {
+        throw new NotImplementedException();
+    }
     
-    //TODO: Get votes on an IP address
-    
+    public async Task<Vote> GetVotes(string ipAddress, CancellationToken? cancellationToken)
+    {
+        var requestUrl = $"/{ipAddress}/votes";
+        
+        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
+        
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
+        return result;
+    }
+
     //TODO: Post vote to IP Address
+    public void PostVote(string ipAddress)
+    {
+        throw new NotImplementedException();
+    }
 }

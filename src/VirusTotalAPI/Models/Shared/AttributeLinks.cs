@@ -1,4 +1,4 @@
-﻿namespace VirusTotalAPI.Models.Comments.IP;
+﻿namespace VirusTotalAPI.Models.Shared;
 
 public class AttributeLinks
 {

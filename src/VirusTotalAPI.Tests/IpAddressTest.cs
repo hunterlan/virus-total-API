@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using VirusTotalAPI.Endpoints;
 using VirusTotalAPI.Exceptions;
 using VirusTotalAPI.Models.Analysis.IP;
+using VirusTotalAPI.Models.Comments.IP;
 
 namespace VirusTotalAPI.Tests;
 
@@ -38,5 +39,12 @@ public class IpAddressTest
     {
         var ipComment = await _endpoint.GetComments(IpAddress, null, new CancellationToken());
         Assert.True(ipComment.Data.Length is 10);
+    }
+
+    [Fact]
+    public async Task IpAddressVotes()
+    {
+        var ipVotes = await _endpoint.GetVotes(IpAddress, new CancellationToken());
+        Assert.True(ipVotes.Data.Length > 0 && ipVotes.Data[0].Attributes is not null);
     }
 }
