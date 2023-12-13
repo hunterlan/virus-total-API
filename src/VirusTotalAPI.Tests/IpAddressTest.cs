@@ -47,4 +47,18 @@ public class IpAddressTest
         var ipVotes = await _endpoint.GetVotes(IpAddress, new CancellationToken());
         Assert.True(ipVotes.Data.Length > 0 && ipVotes.Data[0].Attributes is not null);
     }
+    
+    [Fact]
+    public async Task CatchErrorOnIncorrectPostComment()
+    {
+        await Assert.ThrowsAsync<BadRequestException>(() =>
+            _endpoint.PostComment("8.8.8.8", "", new CancellationToken()));
+    }
+
+    [Fact]
+    public async Task DuplicateErrorPostComment()
+    {
+        await Assert.ThrowsAsync<AlreadyExistsException>(() =>
+            _endpoint.PostComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
+    }
 }
