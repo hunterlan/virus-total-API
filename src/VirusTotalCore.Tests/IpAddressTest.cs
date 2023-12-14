@@ -1,10 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using VirusTotalAPI.Exceptions;
-using VirusTotalAPI.Models.Analysis.IP;
-using VirusTotalAPI.Models.Comments.IP;
 using VirusTotalCore.Endpoints;
 
-namespace VirusTotalAPI.Tests;
+namespace VirusTotalCore.Tests;
 
 public class IpAddressTest
 {

@@ -1,9 +1,7 @@
-
 using Microsoft.Extensions.Configuration;
-using VirusTotalAPI.Exceptions;
 using VirusTotalCore.Endpoints;
 
-namespace VirusTotalAPI.Tests;
+namespace VirusTotalCore.Tests;
 
 public class ErrorTest
 {
