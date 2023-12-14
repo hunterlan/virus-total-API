@@ -1,4 +1,4 @@
-﻿namespace VirusTotalAPI.Models.Comments.IP;
+﻿namespace VirusTotalCore.Models.Comments.IP;
 
 public class IpComment : BaseComment
 {

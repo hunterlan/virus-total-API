@@ -1,12 +1,12 @@
 using System.Text.Json;
 using RestSharp;
-using VirusTotalAPI.Enums;
-using VirusTotalAPI.Models.Add;
-using VirusTotalAPI.Models.Comments;
-using VirusTotalAPI.Models.Comments.IP;
-using VirusTotalAPI.Models.Shared;
-using VirusTotalAPI.Models.Votes;
+using VirusTotalCore.Enums;
+using VirusTotalCore.Models.Add;
 using VirusTotalCore.Models.Analysis.IP;
+using VirusTotalCore.Models.Comments;
+using VirusTotalCore.Models.Comments.IP;
+using VirusTotalCore.Models.Shared;
+using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
@@ -20,7 +20,7 @@ public class AddressIpEndpoint : Endpoint
         Client = new RestClient(options);
     }
 
-    public async Task<IpAnalysisResult> GetReport(string ipAddress, CancellationToken? cancellationToken)
+    public async Task<AddressAnalysisReport> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{ipAddress}").AddHeader("x-apikey", ApiKey);
 
@@ -29,7 +29,7 @@ public class AddressIpEndpoint : Endpoint
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<IpAnalysisResult>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<AddressAnalysisReport>(JsonSerializerOptions)!;
         return result;
     }
 

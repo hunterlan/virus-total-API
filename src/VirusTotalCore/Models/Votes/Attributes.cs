@@ -1,4 +1,4 @@
-namespace VirusTotalAPI.Models.Votes;
+namespace VirusTotalCore.Models.Votes;
 
 public class Attributes
 {

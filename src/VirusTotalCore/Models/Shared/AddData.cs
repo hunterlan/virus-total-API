@@ -1,7 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace VirusTotalAPI.Models.Shared;
-
+namespace VirusTotalCore.Models.Shared;
 
 public class AddData<T>
 {

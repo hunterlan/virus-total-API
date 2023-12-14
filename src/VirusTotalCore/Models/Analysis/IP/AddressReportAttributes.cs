@@ -1,10 +1,9 @@
-using System.Security.Cryptography;
+using VirusTotalAPI.Models.Analysis.IP;
 using VirusTotalAPI.Models.Certificates.SSL;
-using VirusTotalCore.Models.Analysis.IP;
 
-namespace VirusTotalAPI.Models.Analysis.IP;
+namespace VirusTotalCore.Models.Analysis.IP;
 
-public class IpAddressAttributes
+public class AddressReportAttributes
 {
     public int? FirstSubmissionDate { get; set; }
 
@@ -33,7 +32,7 @@ public class IpAddressAttributes
 
     public string? Jarm { get; set; }
 
-    public Votes TotalVotes { get; set; } = new();
+    public VirusTotalCore.Models.Analysis.Votes TotalVotes { get; set; } = new();
 
     public int LastAnalysisDate { get; set; }
 

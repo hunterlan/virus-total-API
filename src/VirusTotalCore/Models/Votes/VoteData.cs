@@ -1,7 +1,6 @@
-using VirusTotalAPI.Models.Shared;
 using VirusTotalCore.Models.Shared;
 
-namespace VirusTotalAPI.Models.Votes;
+namespace VirusTotalCore.Models.Votes;
 
 public class VoteData
 {

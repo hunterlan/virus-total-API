@@ -1,4 +1,4 @@
-namespace VirusTotalAPI.Models.Comments;
+namespace VirusTotalCore.Models.Comments;
 
 public class AddCommentAttribute
 {

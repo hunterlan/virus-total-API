@@ -30,4 +30,11 @@ public class FilesTest
         var analysisResult = await Endpoint.PostFile(@"TestFiles\123.txt", null, new CancellationToken());
         Assert.True(analysisResult is not null);
     }
+
+    [Fact]
+    public async Task GetReportTest()
+    {
+        var report = await Endpoint.GetReport("80e211f190a08c4a28da7c85fbd26b82", null);
+        Assert.True(report is not null);
+    }
 }

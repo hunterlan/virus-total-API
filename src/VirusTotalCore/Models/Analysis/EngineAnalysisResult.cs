@@ -1,4 +1,4 @@
-namespace VirusTotalCore.Models.Analysis.IP;
+namespace VirusTotalCore.Models.Analysis;
 
 public class EngineAnalysisResult
 {

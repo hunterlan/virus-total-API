@@ -1,4 +1,4 @@
-namespace VirusTotalAPI.Models.Analysis.IP;
+namespace VirusTotalCore.Models.Analysis;
 
 public class Votes
 {

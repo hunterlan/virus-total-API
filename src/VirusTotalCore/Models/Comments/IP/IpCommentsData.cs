@@ -1,7 +1,6 @@
-﻿using VirusTotalAPI.Models.Shared;
-using VirusTotalCore.Models.Shared;
+﻿using VirusTotalCore.Models.Shared;
 
-namespace VirusTotalAPI.Models.Comments.IP;
+namespace VirusTotalCore.Models.Comments.IP;
 
 public class IpCommentsData
 {
