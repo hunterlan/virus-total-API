@@ -2,15 +2,13 @@ using System.Text.Json;
 using RestSharp;
 using VirusTotalAPI.Enums;
 using VirusTotalAPI.Models.Add;
-using VirusTotalAPI.Models.Analysis.IP;
 using VirusTotalAPI.Models.Comments;
 using VirusTotalAPI.Models.Comments.IP;
 using VirusTotalAPI.Models.Shared;
 using VirusTotalAPI.Models.Votes;
-using VirusTotalCore;
 using VirusTotalCore.Models.Analysis.IP;
 
-namespace VirusTotalAPI.Endpoints;
+namespace VirusTotalCore.Endpoints;
 
 public class AddressIpEndpoint : Endpoint
 {

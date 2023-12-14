@@ -1,7 +1,7 @@
 
 using Microsoft.Extensions.Configuration;
-using VirusTotalAPI.Endpoints;
 using VirusTotalAPI.Exceptions;
+using VirusTotalCore.Endpoints;
 
 namespace VirusTotalAPI.Tests;
 
