@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using RestSharp;
-using VirusTotalAPI.Exceptions;
-using VirusTotalAPI.Models;
+using VirusTotalCore.Exceptions;
+using VirusTotalCore.Models;
 
 namespace VirusTotalCore;
 

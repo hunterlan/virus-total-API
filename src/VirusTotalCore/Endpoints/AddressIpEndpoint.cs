@@ -1,7 +1,7 @@
 using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Enums;
-using VirusTotalCore.Models.Add;
+using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Comments.IP;
@@ -12,6 +12,10 @@ namespace VirusTotalCore.Endpoints;
 
 public class AddressIpEndpoint : Endpoint
 {
+    /// <summary>
+    /// Constructor of IP Address endpoint
+    /// </summary>
+    /// <param name="apiKey">Your API key from VirusTotal</param>
     public AddressIpEndpoint(string apiKey)
     {
         Url += "/ip_addresses";
@@ -20,6 +24,13 @@ public class AddressIpEndpoint : Endpoint
         Client = new RestClient(options);
     }
 
+    /// <summary>
+    /// Get report on given ip address
+    /// </summary>
+    /// <param name="ipAddress">IPv4 address as string</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns cref="AddressAnalysisReport">Analysis report</returns>
+    /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<AddressAnalysisReport> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{ipAddress}").AddHeader("x-apikey", ApiKey);
@@ -33,6 +44,15 @@ public class AddressIpEndpoint : Endpoint
         return result;
     }
 
+    /// <summary>
+    /// Get comments for given IP address
+    /// </summary>
+    /// <param name="ipAddress">IPv4 address as string</param>
+    /// <param name="cursor"></param>
+    /// <param name="cancellationToken"></param>
+    /// <param name="limits">Maximum number of comments to retrieve. Default is 10.</param>
+    /// <returns cref="IpComment">Comments</returns>
+    /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<IpComment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken, int limits = 10)
     {
         var requestUrl = $"/{ipAddress}/comments?limit={limits}";
@@ -53,6 +73,16 @@ public class AddressIpEndpoint : Endpoint
         return result;
     }
 
+    /// <summary>
+    /// Post your comment to IP address.
+    /// Any word starting with # in your comment's text will be considered a tag,
+    /// and added to the comment's tag attribute.
+    /// </summary>
+    /// <param name="ipAddress">IPv4 address as string</param>
+    /// <param name="comment">Your comment for given IP address</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="NotFoundException">Given IP address not found.</exception>
+    /// <exception cref="AlreadyExistsException">Comment with given content is already exists.</exception>
     public async Task PostComment(string ipAddress, string comment, CancellationToken? cancellationToken)
     {
         var newComment = new AddComment
@@ -89,6 +119,13 @@ public class AddressIpEndpoint : Endpoint
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Get community votes for given IP address.
+    /// </summary>
+    /// <param name="ipAddress">IPv4 address as string</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns cref="Vote">IP address community votes</returns>
+    /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<Vote> GetVotes(string ipAddress, CancellationToken? cancellationToken)
     {
         var requestUrl = $"/{ipAddress}/votes";
@@ -103,6 +140,15 @@ public class AddressIpEndpoint : Endpoint
         return result;
     }
     
+    /// <summary>
+    /// Post your vote to IP Address.
+    /// The verdict attribute must have be either harmless or malicious.
+    /// </summary>
+    /// <param name="ipAddress">IPv4 address as string</param>
+    /// <param cref="VerdictType" name="verdict">Harmless or malicious</param>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="ArgumentOutOfRangeException">Only harmless or malicious verdict is available.</exception>
+    /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task PostVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
         var userVerdict = verdict switch

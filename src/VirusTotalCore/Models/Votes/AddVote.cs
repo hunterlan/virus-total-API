@@ -1,7 +1,6 @@
 using VirusTotalCore.Models.Shared;
-using VirusTotalCore.Models.Votes;
 
-namespace VirusTotalCore.Models.Add;
+namespace VirusTotalCore.Models.Votes;
 
 public class AddVote
 {

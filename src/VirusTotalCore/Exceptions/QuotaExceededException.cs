@@ -1,3 +1,3 @@
-namespace VirusTotalAPI.Exceptions;
+namespace VirusTotalCore.Exceptions;
 
 public class QuotaExceededException(string message) : Exception(message);
