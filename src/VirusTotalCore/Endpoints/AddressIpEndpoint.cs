@@ -10,20 +10,8 @@ using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
-public class AddressIpEndpoint : Endpoint
+public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addresses")
 {
-    /// <summary>
-    /// Constructor of IP Address endpoint
-    /// </summary>
-    /// <param name="apiKey">Your API key from VirusTotal</param>
-    public AddressIpEndpoint(string apiKey)
-    {
-        Url += "/ip_addresses";
-        ApiKey = apiKey;
-        var options = new RestClientOptions(Url);
-        Client = new RestClient(options);
-    }
-
     /// <summary>
     /// Get report on given ip address
     /// </summary>

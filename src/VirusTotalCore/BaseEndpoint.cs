@@ -5,11 +5,20 @@ using VirusTotalCore.Models;
 
 namespace VirusTotalCore;
 
-public abstract class Endpoint
+public abstract class BaseEndpoint
 {
-    protected RestClient Client = null!;
+    protected RestClient Client;
     protected string Url = "https://www.virustotal.com/api/v3";
     private readonly string _apiKey = null!;
+
+    public BaseEndpoint(string apiKey, string endpoint)
+    {
+        Url += endpoint;
+        ApiKey = apiKey;
+        var options = new RestClientOptions(Url);
+        Client = new RestClient(options);
+    }
+    
     protected string ApiKey
     {
         get => _apiKey;
