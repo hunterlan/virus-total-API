@@ -9,7 +9,7 @@ public class SslCertificate
     /// Dictionary containing all certificate's extensions. Subfields may vary. More details
     /// <see href="https://docs.virustotal.com/reference/ssl-certificate">here.</see>
     /// </summary>
-    public required Dictionary<string, string> Extensions { get; set; }
+    public required Extensions Extensions { get; set; }
     /// <summary>
     /// Containing the certificate's issuer data.
     /// </summary>
