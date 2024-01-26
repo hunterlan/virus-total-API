@@ -2,8 +2,9 @@
 
 namespace VirusTotalCore.Models.Comments;
 
-public class BaseComment
+public class Comment
 {
+    public required CommentsData[] Data { get; set; }
     public required Meta Meta { get; set; }
     public required LinkData Links { get; set; }
 }

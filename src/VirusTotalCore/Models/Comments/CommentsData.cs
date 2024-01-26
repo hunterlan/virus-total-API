@@ -1,8 +1,8 @@
 ﻿using VirusTotalCore.Models.Shared;
 
-namespace VirusTotalCore.Models.Comments.IP;
+namespace VirusTotalCore.Models.Comments;
 
-public class IpCommentsData
+public class CommentsData
 {
     public required Attributes Attributes { get; set; }
     public required string Id { get; set; }

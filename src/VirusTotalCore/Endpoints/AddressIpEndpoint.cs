@@ -4,7 +4,6 @@ using VirusTotalCore.Enums;
 using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
-using VirusTotalCore.Models.Comments.IP;
 using VirusTotalCore.Models.Shared;
 using VirusTotalCore.Models.Votes;
 
@@ -41,7 +40,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="limits">Maximum number of comments to retrieve. Default is 10.</param>
     /// <returns cref="IpComment">Comments</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task<IpComment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken, int limits = 10)
+    public async Task<Comment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken, int limits = 10)
     {
         var requestUrl = $"/{ipAddress}/comments?limit={limits}";
 
@@ -57,7 +56,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<IpComment>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<Comment>(JsonSerializerOptions)!;
         return result;
     }
 

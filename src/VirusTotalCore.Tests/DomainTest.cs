@@ -25,4 +25,12 @@ public class DomainTest
         var report = await _endpoint.GetReport("pja.edu.pl", new CancellationToken());
         Assert.True(report is {Type: "domain", Id: domain});
     }
+
+    [Fact]
+    public async Task TestGetCommentsDomainReport()
+    {
+        const string domain = "google.com";
+        var comments = await _endpoint.GetComments(domain, new CancellationToken(), 10, null);
+        Assert.True(comments.Data.Length is 10);
+    }
 }

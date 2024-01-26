@@ -1,4 +1,4 @@
-﻿namespace VirusTotalCore.Models.Comments.IP;
+﻿namespace VirusTotalCore.Models.Comments;
 
 public class Attributes
 {
