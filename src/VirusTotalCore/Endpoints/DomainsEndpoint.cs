@@ -1,17 +1,16 @@
 using System.Text.Json;
 using RestSharp;
+using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Analysis.Domains;
 using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
+using VirusTotalCore.Models.Shared;
+using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
 public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 {
-    /*TODO: implement Get comments on a domain, Add a comment to a domain
-    Get objects related to a domain, Get object descriptors related to a domain, Get a DNS resolution object
-    Get votes on a domain, Add a vote to a domain*/
-
     public async Task<DomainAnalysisReport> GetReport(string domain, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{domain}").AddHeader("x-apikey", ApiKey);
@@ -55,9 +54,28 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         return result;
     }
 
-    public void AddComment()
+    public async Task AddComment(string domain, string comment, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var newComment = new AddComment
+        {
+            Data = new AddData<AddCommentAttribute>
+            {
+                Type = "comment",
+                Attributes = new AddCommentAttribute
+                {
+                    Text = comment
+                }
+            }
+        };
+        var requestUrl = $"/{domain}/comments";
+
+        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
+        var request = new RestRequest(requestUrl)
+            .AddHeader("x-apikey", ApiKey)
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 
     public void GetObjectsRelated()
@@ -75,13 +93,49 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         throw new NotImplementedException();
     }
 
-    public void GetVotes()
+    public async Task<Vote> GetVotes(string domain, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var requestUrl = $"/{domain}/votes";
+
+        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
+
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
+        return result;
     }
 
-    public void AddVote()
+    public async Task AddVote(string domain, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var userVerdict = verdict switch
+        {
+            VerdictType.Harmless => "harmless",
+            VerdictType.Malicious => "malicious",
+            _ => throw new ArgumentOutOfRangeException(nameof(verdict), verdict,
+                "The verdict attribute must have be either harmless or malicious.")
+        };
+
+        var newVote = new AddVote
+        {
+            Data = new AddData<AddVoteAttribute>
+            {
+                Type = "vote",
+                Attributes = new AddVoteAttribute
+                {
+                    Verdict = userVerdict
+                }
+            }
+        };
+
+        var requestUrl = $"/{domain}/votes";
+        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
+        var request = new RestRequest(requestUrl)
+            .AddHeader("x-apikey", ApiKey)
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 }
