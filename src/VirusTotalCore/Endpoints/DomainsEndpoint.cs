@@ -2,7 +2,6 @@ using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Analysis.Domains;
-using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Shared;
 using VirusTotalCore.Models.Votes;
