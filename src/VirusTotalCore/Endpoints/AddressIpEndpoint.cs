@@ -12,7 +12,7 @@ namespace VirusTotalCore.Endpoints;
 public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addresses")
 {
     /// <summary>
-    /// Get report on given ip address
+    ///     Get report on given ip address
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="cancellationToken"></param>
@@ -20,36 +20,34 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<AddressAnalysisReport> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{ipAddress}").AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest($"/{ipAddress}");
 
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<AddressAnalysisReport>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.RootElement.GetProperty("data")
+            .Deserialize<AddressAnalysisReport>(JsonSerializerOptions)!;
         return result;
     }
 
     /// <summary>
-    /// Get comments for given IP address
+    ///     Get comments for given IP address
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="cursor"></param>
     /// <param name="cancellationToken"></param>
-    /// <param name="limits">Maximum number of comments to retrieve. Default is 10.</param>
+    /// <param name="limit">Maximum number of comments to retrieve. Default is 10.</param>
     /// <returns cref="IpComment">Comments</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task<Comment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken, int limits = 10)
+    public async Task<Comment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken,
+        int limit = 10)
     {
-        var requestUrl = $"/{ipAddress}/comments?limit={limits}";
+        var parameters = new { limit, cursor };
+        var requestUrl = $"/{ipAddress}/comments";
 
-        if (cursor is not null)
-        {
-            requestUrl += $"&cursor={cursor}";
-        }
-
-        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest(requestUrl).AddObject(parameters);
 
         var restResponse = await GetResponse(request, cancellationToken);
 
@@ -61,9 +59,9 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     }
 
     /// <summary>
-    /// Post your comment to IP address.
-    /// Any word starting with # in your comment's text will be considered a tag,
-    /// and added to the comment's tag attribute.
+    ///     Post your comment to IP address.
+    ///     Any word starting with # in your comment's text will be considered a tag,
+    ///     and added to the comment's tag attribute.
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="comment">Your comment for given IP address</param>
@@ -87,7 +85,6 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
 
         var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
         var request = new RestRequest(requestUrl)
-            .AddHeader("x-apikey", ApiKey)
             .AddJsonBody(serializedJson);
 
         var restResponse = await PostResponse(request, cancellationToken);
@@ -107,7 +104,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     }
 
     /// <summary>
-    /// Get community votes for given IP address.
+    ///     Get community votes for given IP address.
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="cancellationToken"></param>
@@ -117,7 +114,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     {
         var requestUrl = $"/{ipAddress}/votes";
 
-        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest(requestUrl);
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
@@ -126,10 +123,10 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
         return result;
     }
-    
+
     /// <summary>
-    /// Post your vote to IP Address.
-    /// The verdict attribute must have be either harmless or malicious.
+    ///     Post your vote to IP Address.
+    ///     The verdict attribute must have be either harmless or malicious.
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param cref="VerdictType" name="verdict">Harmless or malicious</param>
@@ -138,6 +135,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task PostVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
+        //TODO: Rewrite Enum to static class
         var userVerdict = verdict switch
         {
             VerdictType.Harmless => "harmless",
@@ -161,7 +159,6 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         var requestUrl = $"/{ipAddress}/votes";
         var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
         var request = new RestRequest(requestUrl)
-            .AddHeader("x-apikey", ApiKey)
             .AddJsonBody(serializedJson);
 
         var restResponse = await PostResponse(request, cancellationToken);

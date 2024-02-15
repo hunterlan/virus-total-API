@@ -30,7 +30,17 @@ public class DomainTest
     public async Task TestGetCommentsDomainReport()
     {
         const string domain = "google.com";
-        var comments = await _endpoint.GetComments(domain, new CancellationToken(), 10, null);
+        var comments = await _endpoint.GetComments(domain, new CancellationToken(), null, 10);
         Assert.True(comments.Data.Length is 10);
     }
+    
+    /*
+     * TODO: Write test for posting comment
+     * Find a way to delete the comment
+     */
+    
+    /*
+     * TODO: Write test for posting vote
+     * Find a way to delete the vote
+     */
 }

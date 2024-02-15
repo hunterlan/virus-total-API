@@ -6,21 +6,12 @@ namespace VirusTotalCore.Endpoints;
 
 public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
 {
-    public async Task<Comment> GetLatest(string? filter, string? cursor, CancellationToken? cancellationToken, int limit = 10)
+    public async Task<Comment> GetLatest(string? filter, string? cursor, CancellationToken? cancellationToken,
+        int limit = 10)
     {
-        var requestUrl = $"?limit={limit}";
+        var parameters = new { limit, filter, cursor };
 
-        if (cursor is not null)
-        {
-            requestUrl += $"&cursor={cursor}";
-        }
-
-        if (filter is not null)
-        {
-            requestUrl += $"&filter={filter}";
-        }
-
-        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest().AddObject(parameters);
 
         var restResponse = await GetResponse(request, cancellationToken);
 

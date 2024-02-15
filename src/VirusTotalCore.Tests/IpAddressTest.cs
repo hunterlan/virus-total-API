@@ -59,4 +59,14 @@ public class IpAddressTest
         await Assert.ThrowsAsync<AlreadyExistsException>(() =>
             _endpoint.PostComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
     }
+    
+    /*
+     * TODO: Write test for posting comment
+     * Find a way to delete the comment
+     */
+    
+    /*
+     * TODO: Write test for posting vote
+     * Find a way to delete the vote
+     */
 }

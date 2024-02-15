@@ -17,6 +17,7 @@ public abstract class BaseEndpoint
         ApiKey = apiKey;
         var options = new RestClientOptions(Url);
         Client = new RestClient(options);
+        Client.AddDefaultHeader("x-apikey", ApiKey);
     }
     
     protected string ApiKey

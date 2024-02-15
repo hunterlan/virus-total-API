@@ -12,37 +12,25 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 {
     public async Task<DomainAnalysisReport> GetReport(string domain, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{domain}").AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest($"/{domain}");
 
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<DomainAnalysisReport>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.RootElement.GetProperty("data")
+            .Deserialize<DomainAnalysisReport>(JsonSerializerOptions)!;
         return result;
     }
 
-    public async Task<Comment> GetComments(string domain, CancellationToken? cancellationToken, int? limit, string? cursor)
+    public async Task<Comment> GetComments(string domain, CancellationToken? cancellationToken, string? cursor, 
+        int limit = 10)
     {
         var finalResource = $"/{domain}/comments";
-        if (limit is not null)
-        {
-            finalResource += $"?limit={limit.ToString()}";
-            if (cursor is not null)
-            {
-                finalResource += $"&cursor={cursor}";
-            }
-        }
-        else
-        {
-            if (cursor is not null)
-            {
-                finalResource += $"?cursor={cursor}";
-            }
-        }
+        var parameters = new { limit, cursor };
 
-        var request = new RestRequest(finalResource).AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest(finalResource).AddObject(parameters);
 
         var restResponse = await GetResponse(request, cancellationToken);
 
@@ -70,7 +58,6 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 
         var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
         var request = new RestRequest(requestUrl)
-            .AddHeader("x-apikey", ApiKey)
             .AddJsonBody(serializedJson);
 
         var restResponse = await PostResponse(request, cancellationToken);
@@ -96,7 +83,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     {
         var requestUrl = $"/{domain}/votes";
 
-        var request = new RestRequest(requestUrl).AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest(requestUrl);
         var restResponse = await GetResponse(request, cancellationToken);
 
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
@@ -108,6 +95,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 
     public async Task AddVote(string domain, VerdictType verdict, CancellationToken? cancellationToken)
     {
+        //TODO: Rewrite Enum to static class
         var userVerdict = verdict switch
         {
             VerdictType.Harmless => "harmless",
@@ -131,7 +119,6 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         var requestUrl = $"/{domain}/votes";
         var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
         var request = new RestRequest(requestUrl)
-            .AddHeader("x-apikey", ApiKey)
             .AddJsonBody(serializedJson);
 
         var restResponse = await PostResponse(request, cancellationToken);

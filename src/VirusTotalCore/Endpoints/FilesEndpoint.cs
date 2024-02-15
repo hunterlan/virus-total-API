@@ -7,8 +7,10 @@ namespace VirusTotalCore.Endpoints;
 public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 {
     public Task<FileAnalysisReport>
-        PostFile(string pathToFile, string? password, CancellationToken? cancellationToken) =>
-        PostFile(pathToFile, Client.Options.BaseUrl!.ToString(), password, cancellationToken);
+        PostFile(string pathToFile, string? password, CancellationToken? cancellationToken)
+    {
+        return PostFile(pathToFile, Client.Options.BaseUrl!.ToString(), password, cancellationToken);
+    }
 
     public async Task<FileAnalysisReport> PostFile(string pathToFile, string url, string? password,
         CancellationToken? cancellationToken)
@@ -17,13 +19,9 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 
         var localClient = new RestClient(url);
         var request = new RestRequest("")
-            .AddHeader("x-apikey", ApiKey)
             .AddFile("file", pathToFile, "multipart/form-data");
 
-        if (password is not null)
-        {
-            request.AddJsonBody(JsonSerializer.Serialize(password));
-        }
+        if (password is not null) request.AddJsonBody(JsonSerializer.Serialize(password));
 
         var restResponse = await localClient.ExecutePostAsync(request, cancellationToken.Value);
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
@@ -36,7 +34,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 
     public async Task<string> GetUrlForPost(CancellationToken? cancellationToken)
     {
-        var request = new RestRequest("/upload_url").AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest("/upload_url");
 
         var restResponse = await GetResponse(request, cancellationToken);
 
@@ -47,7 +45,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 
     public async Task<FileAnalysisReport> GetReport(string fileHash, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{fileHash}").AddHeader("x-apikey", ApiKey);
+        var request = new RestRequest($"/{fileHash}");
 
         var restResponse = await GetResponse(request, cancellationToken);
 
