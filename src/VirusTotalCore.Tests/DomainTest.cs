@@ -31,7 +31,7 @@ public class DomainTest
     {
         const string domain = "google.com";
         var comments = await _endpoint.GetComments(domain, new CancellationToken(), null, 10);
-        Assert.True(comments.Data.Length is 10);
+        Assert.True(comments.Comments.Length is 10);
     }
     
     /*

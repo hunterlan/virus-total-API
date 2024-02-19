@@ -41,7 +41,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="limit">Maximum number of comments to retrieve. Default is 10.</param>
     /// <returns cref="IpComment">Comments</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task<Comment> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken,
+    public async Task<CommentData> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
         var parameters = new { limit, cursor };
@@ -54,7 +54,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<Comment>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
         return result;
     }
 
@@ -144,7 +144,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
                 "The verdict attribute must have be either harmless or malicious.")
         };
 
-        var newVote = new AddVote
+        var newVote = new AddVote<AddData<AddVoteAttribute>>
         {
             Data = new AddData<AddVoteAttribute>
             {

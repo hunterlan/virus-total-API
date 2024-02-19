@@ -1,4 +1,6 @@
-﻿namespace VirusTotalCore.Models.Comments;
+﻿using VirusTotalCore.Models.Comments.Vote;
+
+namespace VirusTotalCore.Models.Comments;
 
 public class Attributes
 {
@@ -10,7 +12,7 @@ public class Attributes
     /// Comment's content.
     /// </summary>
     public required string Text { get; set; }
-    public required Votes Votes { get; set; }
+    public required CommentVotes CommentVotes { get; set; }
     /// <summary>
     /// HTML version of comment.
     /// </summary>

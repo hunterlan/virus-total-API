@@ -24,7 +24,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         return result;
     }
 
-    public async Task<Comment> GetComments(string domain, CancellationToken? cancellationToken, string? cursor, 
+    public async Task<CommentData> GetComments(string domain, CancellationToken? cancellationToken, string? cursor, 
         int limit = 10)
     {
         var finalResource = $"/{domain}/comments";
@@ -37,7 +37,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<Comment>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
         return result;
     }
 

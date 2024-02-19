@@ -4,7 +4,7 @@ namespace VirusTotalCore.Models.Comments;
 
 public class Comment
 {
-    public required CommentsData[] Data { get; set; }
-    public required Meta Meta { get; set; }
-    public required LinkData Links { get; set; }
+    public required Attributes Attributes { get; set; }
+    public required string Id { get; set; }
+    public required AttributeLinks Links { get; set; }
 }

@@ -1,6 +1,6 @@
-﻿namespace VirusTotalCore.Models.Comments;
+﻿namespace VirusTotalCore.Models.Comments.Vote;
 
-public class Votes
+public class CommentVotes
 {
     public long Positive { get; set; }
     public long Abuse { get; set; }

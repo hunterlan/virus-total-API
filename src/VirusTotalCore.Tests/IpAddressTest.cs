@@ -36,7 +36,7 @@ public class IpAddressTest
     public async Task IpAddressComments()
     {
         var ipComment = await _endpoint.GetComments(IpAddress, null, new CancellationToken());
-        Assert.True(ipComment.Data.Length is 10);
+        Assert.True(ipComment.Comments.Length is 10);
     }
 
     [Fact]
