@@ -12,7 +12,7 @@ public class Attributes
     /// Comment's content.
     /// </summary>
     public required string Text { get; set; }
-    public required CommentVotes CommentVotes { get; set; }
+    public required CommentVotes Votes { get; set; }
     /// <summary>
     /// HTML version of comment.
     /// </summary>

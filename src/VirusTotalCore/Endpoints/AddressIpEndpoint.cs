@@ -135,15 +135,6 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task PostVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        //TODO: Rewrite Enum to static class
-        var userVerdict = verdict switch
-        {
-            VerdictType.Harmless => "harmless",
-            VerdictType.Malicious => "malicious",
-            _ => throw new ArgumentOutOfRangeException(nameof(verdict), verdict,
-                "The verdict attribute must have be either harmless or malicious.")
-        };
-
         var newVote = new AddVote<AddData<AddVoteAttribute>>
         {
             Data = new AddData<AddVoteAttribute>
@@ -151,7 +142,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
                 Type = "vote",
                 Attributes = new AddVoteAttribute
                 {
-                    Verdict = userVerdict
+                    Verdict = verdict.ToString().ToLower()
                 }
             }
         };

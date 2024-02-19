@@ -86,4 +86,17 @@ public abstract class BaseEndpoint
             ? Client.ExecutePostAsync(request, cancellationToken.Value)
             : Client.ExecutePostAsync(request);
     }
+
+    
+    protected Task<RestResponse> DeleteResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        if (request.Method is not Method.Delete)
+        {
+            throw new ArgumentException("Request method has to be DELETE!");
+        }
+
+        return cancellationToken is not null
+            ? Client.ExecuteAsync(request, cancellationToken.Value)
+            : Client.ExecuteAsync(request);
+    }
 }

@@ -38,6 +38,17 @@ public class DomainTest
      * TODO: Write test for posting comment
      * Find a way to delete the comment
      */
+    [Fact]
+    public async Task AddCommentTest()
+    {
+        var cancellationToken = new CancellationToken();
+        var commentEndpoint = new CommentEndpoint(ApiKey);
+        const string domain = "google.com";
+        const string comment = "It's google and it's safe";
+        var commentResult = await _endpoint.AddComment(domain, comment, cancellationToken);
+        Assert.True(string.Equals(commentResult.Attributes.Text, comment));
+        await commentEndpoint.Delete(commentResult.Id, cancellationToken);
+    }
     
     /*
      * TODO: Write test for posting vote

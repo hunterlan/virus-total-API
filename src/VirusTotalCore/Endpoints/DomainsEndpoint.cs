@@ -41,7 +41,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         return result;
     }
 
-    public async Task AddComment(string domain, string comment, CancellationToken? cancellationToken)
+    public async Task<Comment> AddComment(string domain, string comment, CancellationToken? cancellationToken)
     {
         var newComment = new AddComment
         {
@@ -62,6 +62,10 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 
         var restResponse = await PostResponse(request, cancellationToken);
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<Comment>(JsonSerializerOptions)!;
+        return result;
     }
 
     public void GetObjectsRelated()
@@ -95,23 +99,14 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 
     public async Task AddVote(string domain, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        //TODO: Rewrite Enum to static class
-        var userVerdict = verdict switch
-        {
-            VerdictType.Harmless => "harmless",
-            VerdictType.Malicious => "malicious",
-            _ => throw new ArgumentOutOfRangeException(nameof(verdict), verdict,
-                "The verdict attribute must have be either harmless or malicious.")
-        };
-
-        var newVote = new AddVote
+        var newVote = new AddVote<AddData<AddVoteAttribute>>
         {
             Data = new AddData<AddVoteAttribute>
             {
                 Type = "vote",
                 Attributes = new AddVoteAttribute
                 {
-                    Verdict = userVerdict
+                    Verdict = verdict.ToString().ToLower()
                 }
             }
         };
