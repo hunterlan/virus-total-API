@@ -1,13 +1,13 @@
 # How to Contribute:
 
-You can contribute to DevToys app by:
+You can contribute to VirusTotalCore app by:
 - Report issues and bugs.
 - Submit feature requests.
 - Creating a pull request.
 
 # How to Build and Run VirusTotalCore from source:
 
-* Make sure your machine is satistifing [.NET 8 requirements](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md).
+* Make sure your machine is satisfying [.NET 8 requirements](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md).
 * Open `src/VirusTotalCore.sln` with your favourite IDE and set Solution Platform to x64*.
 * Create `appsettings.json` and `VirusTotalCore.Tests` and key named `apiKey` and insert your VirusTotal API key as value.
 * Try to build and run unit tests.
