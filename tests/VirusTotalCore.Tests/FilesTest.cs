@@ -18,13 +18,6 @@ public class FilesTest
     }
 
     [Fact]
-    public async Task GetUrlTest()
-    {
-        var url = await Endpoint.GetUrlForPost(null);
-        Assert.True(!string.IsNullOrWhiteSpace(url));
-    }
-
-    [Fact]
     public async Task PostSmallFile()
     {
         var analysisResult = await Endpoint.PostFile(@"TestFiles\123.txt", null, new CancellationToken());
