@@ -1,18 +1,19 @@
 ﻿using System.Text.Json;
 using RestSharp;
+using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.File;
 
 namespace VirusTotalCore.Endpoints;
 
 public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 {
-    public Task<FileAnalysisReport>
-        PostFile(string pathToFile, string? password, CancellationToken? cancellationToken)
+    public Task<AnalysisReport<FileReportAttributes>> PostFile(string pathToFile, string? password, 
+        CancellationToken? cancellationToken)
     {
         return PostFile(pathToFile, Client.Options.BaseUrl!.ToString(), password, cancellationToken);
     }
 
-    public async Task<FileAnalysisReport> PostFile(string pathToFile, string url, string? password,
+    public async Task<AnalysisReport<FileReportAttributes>> PostFile(string pathToFile, string url, string? password,
         CancellationToken? cancellationToken)
     {
         cancellationToken ??= new CancellationToken();
@@ -27,7 +28,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var analysisResult = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<FileAnalysisReport>(JsonSerializerOptions)!;
+            .Deserialize<AnalysisReport<FileReportAttributes>>(JsonSerializerOptions)!;
 
         return analysisResult;
     }
@@ -43,7 +44,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
         return resultJsonDocument.RootElement.GetProperty("data").GetString()!;
     }
 
-    public async Task<FileAnalysisReport> GetReport(string fileHash, CancellationToken? cancellationToken)
+    public async Task<AnalysisReport<FileReportAttributes>> GetReport(string fileHash, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{fileHash}");
 
@@ -52,7 +53,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var reportResult = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<FileAnalysisReport>(JsonSerializerOptions)!;
+            .Deserialize<AnalysisReport<FileReportAttributes>>(JsonSerializerOptions)!;
         return reportResult;
     }
 }

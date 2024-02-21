@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using VirusTotalCore.Endpoints;
 using VirusTotalCore.Models.Comments;
+using VirusTotalCore.Models.Comments.Vote;
 
 namespace VirusTotalCore.Tests;
 
@@ -13,6 +14,7 @@ public class CommentTest
     public CommentTest()
     {
         var settings = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
             .AddJsonFile("appsettings.json")
             .Build();
         ApiKey = settings["apiKey"]!;

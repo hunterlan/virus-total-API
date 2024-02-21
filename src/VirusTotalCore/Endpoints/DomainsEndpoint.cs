@@ -1,6 +1,7 @@
 using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Enums;
+using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.Domains;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Shared;
@@ -10,7 +11,7 @@ namespace VirusTotalCore.Endpoints;
 
 public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 {
-    public async Task<DomainAnalysisReport> GetReport(string domain, CancellationToken? cancellationToken)
+    public async Task<AnalysisReport<DomainReportAttributes>> GetReport(string domain, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{domain}");
 
@@ -20,7 +21,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<DomainAnalysisReport>(JsonSerializerOptions)!;
+            .Deserialize<AnalysisReport<DomainReportAttributes>>(JsonSerializerOptions)!;
         return result;
     }
 

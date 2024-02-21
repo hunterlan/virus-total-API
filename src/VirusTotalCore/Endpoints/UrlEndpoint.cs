@@ -2,12 +2,12 @@ namespace VirusTotalCore.Endpoints;
 
 public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
 {
-    public void Scan(string url)
+    private async Task<string> Scan(string url)
     {
         throw new NotImplementedException();
     }
 
-    public void GetReport(string id)
+    public async Task GetReport(string id)
     {
         throw new NotImplementedException();
     }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Exceptions;
+using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Shared;
@@ -18,7 +19,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="cancellationToken"></param>
     /// <returns cref="AddressAnalysisReport">Analysis report</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task<AddressAnalysisReport> GetReport(string ipAddress, CancellationToken? cancellationToken)
+    public async Task<AnalysisReport<AddressReportAttributes>> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
         var request = new RestRequest($"/{ipAddress}");
 
@@ -28,7 +29,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
         var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AddressAnalysisReport>(JsonSerializerOptions)!;
+            .Deserialize<AnalysisReport<AddressReportAttributes>>(JsonSerializerOptions)!;
         return result;
     }
 

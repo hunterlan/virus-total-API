@@ -1,4 +1,4 @@
-﻿namespace VirusTotalCore.Models.Comments;
+﻿namespace VirusTotalCore.Models.Comments.Vote;
 
 public enum CommentVerdict
 {

@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirusTotalCore", "src\VirusTotalCore\VirusTotalCore.csproj", "{C2D5EBFF-CAD9-49D8-8019-D567EDB02D57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirusTotalCore.Tests", "src\VirusTotalCore.Tests\VirusTotalCore.Tests.csproj", "{CFA7370B-860E-43F8-89E6-1FAFEFD07174}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirusTotalCore.Tests", "tests\VirusTotalCore.Tests\VirusTotalCore.Tests.csproj", "{CFA7370B-860E-43F8-89E6-1FAFEFD07174}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,8 +1,7 @@
 using System.Text.Json;
 using RestSharp;
-using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Comments;
-using VirusTotalCore.Models.Shared;
+using VirusTotalCore.Models.Comments.Vote;
 using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
