@@ -87,7 +87,13 @@ public abstract class BaseEndpoint
             : Client.ExecutePostAsync(request);
     }
 
-    
+    protected Task<RestResponse> PostFormResponse(RestRequest request, CancellationToken? cancellationToken)
+    {
+        return cancellationToken is not null
+            ? Client.ExecuteAsync(request, cancellationToken.Value)
+            : Client.ExecuteAsync(request);
+    }
+
     protected Task<RestResponse> DeleteResponse(RestRequest request, CancellationToken? cancellationToken)
     {
         if (request.Method is not Method.Delete)
