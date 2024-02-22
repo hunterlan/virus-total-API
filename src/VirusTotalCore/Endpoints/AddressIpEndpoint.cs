@@ -17,7 +17,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="cancellationToken"></param>
-    /// <returns cref="AddressAnalysisReport">Analysis report</returns>
+    /// <returns cref="AddressReportAttributes">Analysis report</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<AnalysisReport<AddressReportAttributes>> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
@@ -42,6 +42,8 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="limit">Maximum number of comments to retrieve. Default is 10.</param>
     /// <returns cref="IpComment">Comments</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
+    /// <exception cref="AuthenticationRequiredError">Empty API key</exception>
+    /// <exception cref="WrongCredentialsError">Invalid API key</exception>
     public async Task<CommentData> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
@@ -69,7 +71,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="cancellationToken"></param>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     /// <exception cref="AlreadyExistsException">Comment with given content is already exists.</exception>
-    public async Task PostComment(string ipAddress, string comment, CancellationToken? cancellationToken)
+    public async Task AddComment(string ipAddress, string comment, CancellationToken? cancellationToken)
     {
         var newComment = new AddComment
         {
@@ -109,9 +111,9 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// </summary>
     /// <param name="ipAddress">IPv4 address as string</param>
     /// <param name="cancellationToken"></param>
-    /// <returns cref="Vote">IP address community votes</returns>
+    /// <returns cref="VoteData">IP address community votes</returns>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task<Vote> GetVotes(string ipAddress, CancellationToken? cancellationToken)
+    public async Task<VoteData> GetVotes(string ipAddress, CancellationToken? cancellationToken)
     {
         var requestUrl = $"/{ipAddress}/votes";
 
@@ -121,7 +123,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
         return result;
     }
 
@@ -134,9 +136,9 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <param name="cancellationToken"></param>
     /// <exception cref="ArgumentOutOfRangeException">Only harmless or malicious verdict is available.</exception>
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
-    public async Task PostVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
+    public async Task AddVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        var newVote = new AddVote<AddData<AddVoteAttribute>>
+        var newVote = new AddVote
         {
             Data = new AddData<AddVoteAttribute>
             {

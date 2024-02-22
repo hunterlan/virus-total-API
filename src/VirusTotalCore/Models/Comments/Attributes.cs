@@ -17,5 +17,5 @@ public class Attributes
     /// HTML version of comment.
     /// </summary>
     public required string Html { get; set; }
-    public required string[] Tags { get; set; }
+    public required IEnumerable<string> Tags { get; set; }
 }

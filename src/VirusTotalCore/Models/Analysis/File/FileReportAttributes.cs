@@ -11,8 +11,8 @@ public class FileReportAttributes
     /// In-house similarity clustering algorithm value, based on a simple structural feature hash allows you to find similar files.
     /// </summary>
     public required string Vhash { get; set; }
-    public required string[] TypeTags { get; set; }
-    public required string[] Names { get; set; }
+    public required IEnumerable<string> TypeTags { get; set; }
+    public required IEnumerable<string> Names { get; set; }
     public long LastModificationDate { get; set; }
     public required string TypeTag { get; set; }
     public long TimesSubmitted { get; set; }
@@ -22,7 +22,7 @@ public class FileReportAttributes
     public long LastSubmissionDate { get; set; }
     public required Dictionary<string, EngineAnalysisResult> LastAnalysisResults { get; set; }
     public required string Sha256 { get; set; }
-    public required string[] Tags { get; set; }
+    public required IEnumerable<string> Tags { get; set; }
     public long LastAnalysisDate { get; set; }
     public long UniqueSources { get; set; }
     public long FirstSubmissionDate { get; set; }

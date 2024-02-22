@@ -30,14 +30,14 @@ public class UrlTest
     public async Task GetCommentsTest()
     {
         string urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
-        var commentData = await _endpoint.GetComments(urlId, null, null, null);
+        var commentData = await _endpoint.GetComments(urlId, null, null);
         Assert.NotNull(commentData);
     }
 
     [Fact]
     public async Task AddCommentTest()
     {
-        string urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
+        var urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
         var commentData = await _endpoint.AddComment(urlId, "Website of Microsoft, which suggest to download dotnet.", null);
         Assert.NotNull(commentData);
         await _commentEndpoint.Delete(commentData.Id, null);
@@ -46,7 +46,7 @@ public class UrlTest
     [Fact]
     public async Task GetVotesTest()
     {
-        string urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
+        var urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
         var votesData = await _endpoint.GetVotes(urlId, new CancellationToken());
         Assert.NotNull(votesData);
     }

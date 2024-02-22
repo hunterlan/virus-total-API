@@ -2,7 +2,7 @@ using VirusTotalCore.Models.Shared;
 
 namespace VirusTotalCore.Models.Votes;
 
-public class AddVote<T>
+public class AddVote
 {
-    public required T Data { get; set; }
+    public required AddData<AddVoteAttribute> Data { get; set; }
 }

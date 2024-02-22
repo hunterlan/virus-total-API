@@ -26,7 +26,7 @@ public class UrlReportAttributes
     public required string LastHttpResponseContentSha256 { get; set; }
     public required Dictionary<string, string> LastHttpResponseHeaders { get; set; }
     public required List<string> OutgoingLinks { get; set; }
-    public required Dictionary<string, string[]> HtmlMeta { get; set; }
+    public required Dictionary<string, IEnumerable<string>> HtmlMeta { get; set; }
     public int Reputation { get; set; }
     /// <summary>
     /// Identificative attributes.

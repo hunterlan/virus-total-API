@@ -9,9 +9,18 @@ using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
+/// <summary>
+/// Analyse URLs, get reports, comments and votes about it and owns.
+/// </summary>
+/// <param name="apiKey">User's API key.</param>
 public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
 {
-    private async Task<string> Scan(string url, CancellationToken? cancellationToken)
+    /// <summary>
+    /// Request to scan URL. 
+    /// </summary>
+    /// <param name="url">URL to scan</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    private async Task Scan(string url, CancellationToken? cancellationToken)
     {
         var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post, "https://www.virustotal.com/api/v3/urls");
@@ -21,30 +30,18 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         request.Content = content;
         var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        var resultString = await response.Content.ReadAsStringAsync();
-        var resultJsonDocument = JsonDocument.Parse(resultString);
-
-        //TODO: bug of RestSharp???
-        /*var request = new RestRequest("/urls", Method.Post)
-        {
-            AlwaysMultipartFormData = true
-        };
-        request.AddParameter("url", "https://shields.io/badges/git-hub-actions-workflow-status");
-
-        var restResponse = await PostFormResponse(request, cancellationToken);
-        
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);*/
-        var result = resultJsonDocument.RootElement.GetProperty("data").GetProperty("id")
-            .Deserialize<string>(JsonSerializerOptions)!;
-        return result;
     }
 
+    /// <summary>
+    /// Get report about url
+    /// </summary>
+    /// <param name="url">URL to scan</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns cref="UrlReportAttributes">Report analysis</returns>
+    /// <exception cref="Exception"></exception>
     public async Task<AnalysisReport<UrlReportAttributes>> GetReport(string url, CancellationToken? cancellationToken)
     {
-        var id = await Scan(url, cancellationToken);
-        //TODO: When VirusTotal fix bug, change to ID
+        await Scan(url, cancellationToken);
         var request = new RestRequest($"/{ToBase64String(url)}");
         var restResponse = await GetResponse(request, cancellationToken);
         
@@ -61,10 +58,19 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         throw new NotImplementedException();
     }
 
-    public async Task<CommentData> GetComments(string id, string? filter, string? cursor, CancellationToken? cancellationToken,
+    /// <summary>
+    /// Get comments about URL.
+    /// </summary>
+    /// <param name="id">URL identifier</param>
+    /// <param name="cursor">Continuation cursor</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="limit">Maximum number of comments to retrieve. By default is 10.</param>
+    /// <returns>List of comments with metadata.</returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<CommentData> GetComments(string id, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
-        var parameters = new { limit, filter, cursor };
+        var parameters = new { limit, cursor };
         
         var request = new RestRequest($"/{id}/comments").AddObject(parameters);
 
@@ -77,6 +83,14 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         return result;
     }
 
+    /// <summary>
+    /// Add user's comment to URL.
+    /// </summary>
+    /// <param name="id">URL identifier</param>
+    /// <param name="comment">Comment content</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Comment data</returns>
+    /// <exception cref="Exception"></exception>
     public async Task<Comment> AddComment(string id, string comment, CancellationToken? cancellationToken)
     {
         var newComment = new AddComment
@@ -113,7 +127,14 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         throw new NotImplementedException();
     }
 
-    public async Task<Vote> GetVotes(string id, CancellationToken? cancellationToken)
+    /// <summary>
+    /// Get votes on URL.
+    /// </summary>
+    /// <param name="id">URL identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Votes with metadata</returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<VoteData> GetVotes(string id, CancellationToken? cancellationToken)
     {
         var requestUrl = $"/{id}/votes";
 
@@ -123,13 +144,21 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
 
         var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
+        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
         return result;
     }
 
+    
+    /// <summary>
+    /// Add user's vote to URL.
+    /// </summary>
+    /// <param name="id">URL identifier</param>
+    /// <param name="verdict">"Harmless" or "Malicious"</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <exception cref="Exception"></exception>
     public async Task AddVote(string id, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        var newVote = new AddVote<AddData<AddVoteAttribute>>
+        var newVote = new AddVote
         {
             Data = new AddData<AddVoteAttribute>
             {

@@ -36,28 +36,28 @@ public class IpAddressTest
     public async Task IpAddressComments()
     {
         var ipComment = await _endpoint.GetComments(IpAddress, null, new CancellationToken());
-        Assert.True(ipComment.Comments.Length is 10);
+        Assert.True(ipComment.Comments.Count() is 10);
     }
 
     [Fact]
     public async Task IpAddressVotes()
     {
         var ipVotes = await _endpoint.GetVotes(IpAddress, new CancellationToken());
-        Assert.True(ipVotes.Data.Length > 0 && ipVotes.Data[0].Attributes is not null);
+        Assert.True(ipVotes.Data.Any() && ipVotes.Data.First().Attributes is not null);
     }
     
     [Fact]
     public async Task CatchErrorOnIncorrectPostComment()
     {
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            _endpoint.PostComment("8.8.8.8", "", new CancellationToken()));
+            _endpoint.AddComment("8.8.8.8", "", new CancellationToken()));
     }
 
     [Fact]
     public async Task DuplicateErrorPostComment()
     {
         await Assert.ThrowsAsync<AlreadyExistsException>(() =>
-            _endpoint.PostComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
+            _endpoint.AddComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
     }
     
     /*
