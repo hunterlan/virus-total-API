@@ -2,6 +2,8 @@ using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.URL;
+using VirusTotalCore.Models.Comments;
+using VirusTotalCore.Models.Shared;
 
 namespace VirusTotalCore.Endpoints;
 
@@ -57,14 +59,46 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         throw new NotImplementedException();
     }
 
-    public void GetComments()
+    public async Task<CommentData> GetComments(string id, string? filter, string? cursor, CancellationToken? cancellationToken,
+        int limit = 10)
     {
-        throw new NotImplementedException();
+        var parameters = new { limit, filter, cursor };
+        
+        var request = new RestRequest($"/{id}/comments").AddObject(parameters);
+
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
+        return result;
     }
 
-    public void AddComment()
+    public async Task<Comment> AddComment(string id, string comment, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var newComment = new AddComment
+        {
+            Data = new AddData<AddCommentAttribute>
+            {
+                Type = "comment",
+                Attributes = new AddCommentAttribute
+                {
+                    Text = comment
+                }
+            }
+        };
+        
+        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
+        var request = new RestRequest($"/{id}/comments")
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<Comment>(JsonSerializerOptions)!;
+        return result;
     }
 
     public void GetObjectsRelated()
