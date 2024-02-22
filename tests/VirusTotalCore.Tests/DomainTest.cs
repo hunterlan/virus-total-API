@@ -34,10 +34,6 @@ public class DomainTest
         Assert.True(comments.Comments.Length is 10);
     }
     
-    /*
-     * TODO: Write test for posting comment
-     * Find a way to delete the comment
-     */
     [Fact]
     public async Task AddCommentTest()
     {

@@ -1,9 +1,11 @@
 using System.Text.Json;
 using RestSharp;
+using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.URL;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Shared;
+using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
@@ -111,14 +113,41 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         throw new NotImplementedException();
     }
 
-    public void GetVotes()
+    public async Task<Vote> GetVotes(string id, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var requestUrl = $"/{id}/votes";
+
+        var request = new RestRequest(requestUrl);
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
+
+        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
+        var result = resultJsonDocument.Deserialize<Vote>(JsonSerializerOptions)!;
+        return result;
     }
 
-    public void AddVote()
+    public async Task AddVote(string id, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        throw new NotImplementedException();
+        var newVote = new AddVote<AddData<AddVoteAttribute>>
+        {
+            Data = new AddData<AddVoteAttribute>
+            {
+                Type = "vote",
+                Attributes = new AddVoteAttribute
+                {
+                    Verdict = verdict.ToString().ToLower()
+                }
+            }
+        };
+
+        var requestUrl = $"/{id}/votes";
+        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
+        var request = new RestRequest(requestUrl)
+            .AddJsonBody(serializedJson);
+
+        var restResponse = await PostResponse(request, cancellationToken);
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 
     private static string ToBase64String(string plainText) 

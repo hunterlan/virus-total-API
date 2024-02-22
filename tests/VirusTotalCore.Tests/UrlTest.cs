@@ -42,4 +42,12 @@ public class UrlTest
         Assert.NotNull(commentData);
         await _commentEndpoint.Delete(commentData.Id, null);
     }
+
+    [Fact]
+    public async Task GetVotesTest()
+    {
+        string urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
+        var votesData = await _endpoint.GetVotes(urlId, new CancellationToken());
+        Assert.NotNull(votesData);
+    }
 }
