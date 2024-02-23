@@ -45,7 +45,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
         }
         else
         {
-            throw new FileNotFoundException();
+            throw new FileNotFoundException($"Unable to find the specified file. Path is {pathToFile}");
         }
 
         var localClient = new RestClient(url);
