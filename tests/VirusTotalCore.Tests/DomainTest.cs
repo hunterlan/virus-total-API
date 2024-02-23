@@ -12,7 +12,8 @@ public class DomainTest
     public DomainTest()
     {
         var settings = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         _endpoint = new DomainsEndpoint(ApiKey);

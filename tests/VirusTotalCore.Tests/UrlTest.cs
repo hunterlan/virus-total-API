@@ -12,7 +12,7 @@ public class UrlTest
     {
         var settings = new ConfigurationBuilder()
             .AddEnvironmentVariables()
-            .AddJsonFile("appsettings.json")
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         _commentEndpoint = new CommentEndpoint(ApiKey);

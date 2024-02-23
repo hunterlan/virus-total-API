@@ -11,7 +11,8 @@ public class FilesTest
     public FilesTest()
     {
         var settings = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         Endpoint = new FilesEndpoint(ApiKey);
