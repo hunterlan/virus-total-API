@@ -1,17 +1,22 @@
 ﻿using Microsoft.Extensions.Configuration;
+using RestSharp;
 using VirusTotalCore.Endpoints;
+using Xunit.Abstractions;
 
 namespace VirusTotalCore.Tests;
 
 public class FilesTest
 {
+    private readonly ITestOutputHelper _testOutputHelper;
     private string ApiKey { get; }
     private FilesEndpoint Endpoint { get; }
 
-    public FilesTest()
+    public FilesTest(ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
         var settings = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         Endpoint = new FilesEndpoint(ApiKey);
@@ -20,7 +25,8 @@ public class FilesTest
     [Fact]
     public async Task PostSmallFile()
     {
-        var analysisResult = await Endpoint.PostFile(@"TestFiles\123.txt", null, new CancellationToken());
+        _testOutputHelper.WriteLine(Directory.GetCurrentDirectory());
+        var analysisResult = await Endpoint.PostFile($"test_files{Path.DirectorySeparatorChar}123.txt", null, new CancellationToken());
         Assert.True(analysisResult is not null);
     }
 

@@ -11,7 +11,8 @@ public class ErrorTest
     public ErrorTest()
     {
         var settings = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         _endpoint = new AddressIpEndpoint(ApiKey);

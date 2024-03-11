@@ -15,7 +15,7 @@ public class CommentTest
     {
         var settings = new ConfigurationBuilder()
             .AddEnvironmentVariables()
-            .AddJsonFile("appsettings.json")
+            .AddJsonFile("appsettings.json", optional: true)
             .Build();
         ApiKey = settings["apiKey"]!;
         _endpoint = new CommentEndpoint(ApiKey);

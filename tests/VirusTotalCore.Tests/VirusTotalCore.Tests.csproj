@@ -36,10 +36,13 @@
       <None Update="TestFIles\123.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="test_files\123.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="TestFIles\" />
+      <Folder Include="test_files\" />
     </ItemGroup>
 
 </Project>
