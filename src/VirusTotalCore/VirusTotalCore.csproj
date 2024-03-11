@@ -9,8 +9,8 @@
     <Authors>Kostiantyn Sharykin</Authors>
     <Description>C# library implementation of anti-virus service - VirusTotal</Description>
     <Copyright>MIT License</Copyright>
-    <PackageLicenseUrl>https://github.com/hunterlan/virus-total-API/blob/main/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/hunterlan/virus-total-API</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/hunterlan/VirusTotalCore/blob/main/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/hunterlan/VirusTotalCore</RepositoryUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
