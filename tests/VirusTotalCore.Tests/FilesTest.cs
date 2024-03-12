@@ -10,7 +10,8 @@ public class FilesTest
     private readonly ITestOutputHelper _testOutputHelper;
     private string ApiKey { get; }
     private FilesEndpoint Endpoint { get; }
-
+    private const string TestFileHashId = "80e211f190a08c4a28da7c85fbd26b82";
+    private const string GraphRelationship = "graphs";
     public FilesTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
@@ -33,7 +34,14 @@ public class FilesTest
     [Fact]
     public async Task GetReportTest()
     {
-        var report = await Endpoint.GetReport("80e211f190a08c4a28da7c85fbd26b82", null);
+        var report = await Endpoint.GetReport(TestFileHashId, null);
         Assert.True(report is not null);
+    }
+    
+    [Fact]
+    public async Task GetRelationshipsTest()
+    {
+        var relatedObjectsJson = await Endpoint.GetRelatedObjects(TestFileHashId, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
 }

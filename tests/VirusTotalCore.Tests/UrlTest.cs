@@ -5,6 +5,8 @@ namespace VirusTotalCore.Tests;
 
 public class UrlTest
 {
+    private const string GraphRelationship = "graphs";
+    private const string DotnetUrlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
     private string ApiKey { get; }
     private readonly UrlEndpoint _endpoint;
     private readonly CommentEndpoint _commentEndpoint;
@@ -29,16 +31,14 @@ public class UrlTest
     [Fact]
     public async Task GetCommentsTest()
     {
-        string urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
-        var commentData = await _endpoint.GetComments(urlId, null, null);
+        var commentData = await _endpoint.GetComments(DotnetUrlId, null, null);
         Assert.NotNull(commentData);
     }
 
     [Fact]
     public async Task AddCommentTest()
     {
-        var urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
-        var commentData = await _endpoint.AddComment(urlId, "Website of Microsoft, which suggest to download dotnet.", null);
+        var commentData = await _endpoint.AddComment(DotnetUrlId, "Website of Microsoft, which suggest to download dotnet.", null);
         Assert.NotNull(commentData);
         await _commentEndpoint.Delete(commentData.Id, null);
     }
@@ -46,8 +46,14 @@ public class UrlTest
     [Fact]
     public async Task GetVotesTest()
     {
-        var urlId = "aba51b6c10fd1449e5700fc8c022c53157247b32bce5e33217495b11d9aee78a";
-        var votesData = await _endpoint.GetVotes(urlId, new CancellationToken());
+        var votesData = await _endpoint.GetVotes(DotnetUrlId, new CancellationToken());
         Assert.NotNull(votesData);
+    }
+    
+    [Fact]
+    public async Task GetRelationshipsTest()
+    {
+        var relatedObjectsJson = await _endpoint.GetRelatedObjects(DotnetUrlId, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
 }

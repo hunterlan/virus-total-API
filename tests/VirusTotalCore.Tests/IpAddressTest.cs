@@ -7,6 +7,7 @@ namespace VirusTotalCore.Tests;
 public class IpAddressTest
 {
     private const string IpAddress = "8.8.8.8";
+    private const string GraphRelationship = "graphs";
     private string ApiKey { get; }
     private readonly AddressIpEndpoint _endpoint;
 
@@ -61,10 +62,6 @@ public class IpAddressTest
             _endpoint.AddComment(IpAddress, "Lorem ipsum dolor sit ...", new CancellationToken()));
     }
     
-    /*
-     * TODO: Write test for posting comment
-     * Find a way to delete the comment
-     */
     [Fact]
     public async Task AddCommentTest()
     {
@@ -73,12 +70,19 @@ public class IpAddressTest
         var commentEndpoint = new CommentEndpoint(ApiKey);
         
         await _endpoint.AddComment(IpAddress, comment, cancellationToken);
-        var commentData = await commentEndpoint.GetLatest(comment, null, cancellationToken);
+        var commentData = await _endpoint.GetComments(IpAddress, null, cancellationToken);
         var publishedComment = commentData.Comments.First();
         Assert.Equal(comment, publishedComment.Attributes.Text);
         
         var commentId = publishedComment.Id;
         await commentEndpoint.Delete(commentId, cancellationToken);
+    }
+
+    [Fact]
+    public async Task GetRelationshipsTest()
+    {
+        var relatedObjectsJson = await _endpoint.GetRelatedObjects(IpAddress, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
 
     /*

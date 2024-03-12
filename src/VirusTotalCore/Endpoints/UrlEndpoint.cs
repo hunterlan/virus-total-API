@@ -169,6 +169,12 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 
+    public override async Task<string> GetRelatedObjects(string id, string relationship, string? cursor,
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        return await base.GetRelatedObjects(id, relationship, cursor, cancellationToken, limit);
+    }
+
     private static string ToBase64String(string plainText) 
     {
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
