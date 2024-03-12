@@ -58,14 +58,29 @@ public class IpAddressTest
     public async Task DuplicateErrorPostComment()
     {
         await Assert.ThrowsAsync<AlreadyExistsException>(() =>
-            _endpoint.AddComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
+            _endpoint.AddComment(IpAddress, "Lorem ipsum dolor sit ...", new CancellationToken()));
     }
     
     /*
      * TODO: Write test for posting comment
      * Find a way to delete the comment
      */
-    
+    [Fact]
+    public async Task AddCommentTest()
+    {
+        var comment = "This is test comment for VirusTotalCore library";
+        var cancellationToken = new CancellationToken();
+        var commentEndpoint = new CommentEndpoint(ApiKey);
+        
+        await _endpoint.AddComment(IpAddress, comment, cancellationToken);
+        var commentData = await commentEndpoint.GetLatest(comment, null, cancellationToken);
+        var publishedComment = commentData.Comments.First();
+        Assert.Equal(comment, publishedComment.Attributes.Text);
+        
+        var commentId = publishedComment.Id;
+        await commentEndpoint.Delete(commentId, cancellationToken);
+    }
+
     /*
      * TODO: Write test for posting vote
      * Find a way to delete the vote
