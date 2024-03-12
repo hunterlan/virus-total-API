@@ -124,6 +124,15 @@ public abstract class BaseEndpoint
     public async Task<string> GetRelatedDescriptors(string classObjectApiValue, string relationship, string? cursor, 
         CancellationToken? cancellationToken, int limit = 10)
     {
-        throw new NotImplementedException();
+        var parameters = new { limit, cursor };
+        var requestUrl = $"{classObjectApiValue}/relationships/{relationship}";
+        
+        var request = new RestRequest(requestUrl).AddObject(parameters);
+        
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+
+        return restResponse.Content!;
     }
 }
