@@ -94,16 +94,6 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
         return result;
     }
 
-    public void GetObjectsRelated()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void GetObjectDescriptors()
-    {
-        throw new NotImplementedException();
-    }
-
     public void GetDnsResolution()
     {
         throw new NotImplementedException();

@@ -117,16 +117,6 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         return result;
     }
 
-    public void GetObjectsRelated()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void GetObjectDescription()
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Get votes on URL.
     /// </summary>

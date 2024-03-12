@@ -105,4 +105,25 @@ public abstract class BaseEndpoint
             ? Client.ExecuteAsync(request, cancellationToken.Value)
             : Client.ExecuteAsync(request);
     }
+
+    public async Task<string> GetRelatedObjects(string classObjectApiValue, string relationship, string? cursor, 
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        var parameters = new { limit, cursor };
+        var requestUrl = $"{classObjectApiValue}/{relationship}";
+        
+        var request = new RestRequest(requestUrl).AddObject(parameters);
+        
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+
+        return restResponse.Content!;
+    }
+
+    public async Task<string> GetRelatedDescriptors(string classObjectApiValue, string relationship, string? cursor, 
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        throw new NotImplementedException();
+    }
 }
