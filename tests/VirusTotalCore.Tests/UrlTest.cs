@@ -56,4 +56,11 @@ public class UrlTest
         var relatedObjectsJson = await _endpoint.GetRelatedObjects(DotnetUrlId, GraphRelationship, null, null);
         Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
+
+    [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await _endpoint.GetRelatedDescriptors(DotnetUrlId, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
+    }
 }

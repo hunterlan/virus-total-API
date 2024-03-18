@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic;
 using VirusTotalCore.Endpoints;
 
 namespace VirusTotalCore.Tests;
@@ -51,6 +52,13 @@ public class DomainTest
     {
         var relatedObjectsJson = await _endpoint.GetRelatedObjects(GoogleDomain, GraphRelationship, null, null);
         Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
+    }
+
+    [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await _endpoint.GetRelatedDescriptors(GoogleDomain, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
     }
     
     /*

@@ -85,6 +85,13 @@ public class IpAddressTest
         Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
 
+    [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await _endpoint.GetRelatedDescriptors(IpAddress, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
+    }
+
     /*
      * TODO: Write test for posting vote
      * Find a way to delete the vote

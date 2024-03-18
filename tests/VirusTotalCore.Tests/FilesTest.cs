@@ -44,4 +44,11 @@ public class FilesTest
         var relatedObjectsJson = await Endpoint.GetRelatedObjects(TestFileHashId, GraphRelationship, null, null);
         Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
     }
+
+        [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await Endpoint.GetRelatedDescriptors(TestFileHashId, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
+    }
 }
