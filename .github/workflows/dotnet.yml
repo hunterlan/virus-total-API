@@ -22,3 +22,11 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build -c Release --no-restore
+    - name: Generate NuGet 
+      run: dotnet build
+    - name: Publish NuGet to nuget.org
+      run: dotnet nuget push src/VirusTotalCore/bin/Release/VirusTotalCore.1.0.0.nupkg --api-key ${{ secrets.NUGET_APIKEY }} --source https://api.nuget.org/v3/index.json
+    - name: Add GitHub as source
+      run: dotnet nuget add source --username hunterlan --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/hunterlan/VirusTotalCore/index.json"
+    - name: Publish NuGet to GitHub
+      run: dotnet nuget push src/VirusTotalCore/bin/Release/VirusTotalCore.1.0.0.nupkg  --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
