@@ -105,4 +105,54 @@ public abstract class BaseEndpoint
             ? Client.ExecuteAsync(request, cancellationToken.Value)
             : Client.ExecuteAsync(request);
     }
+
+    /// <summary>
+    /// This endpoint allows to get objects relationship to another objects. 
+    /// </summary>
+    /// <param name="classObjectApiValue">Value of specific endpoint. For example, for IP it's IP value</param>
+    /// <param name="relationship">Relationship name. See VirusTotal relationship table for specific endpoint.</param>
+    /// <param name="cursor">Continuation cursor</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="limit">Maximum number of related objects to retrieve</param>
+    /// <returns>JSON string</returns>
+    /// <exception cref="Exception"></exception>
+    public virtual async Task<string> GetRelatedObjects(string classObjectApiValue, string relationship, string? cursor, 
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        var parameters = new { limit, cursor };
+        var requestUrl = $"{classObjectApiValue}/{relationship}";
+        
+        var request = new RestRequest(requestUrl).AddObject(parameters);
+        
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+
+        return restResponse.Content!;
+    }
+
+    /// <summary>
+    /// Get related object's IDs
+    /// </summary>
+    /// <param name="classObjectApiValue">Value of specific endpoint. For example, for IP it's IP value</param>
+    /// <param name="relationship">Relationship name. See VirusTotal relationship table for specific endpoint.</param>
+    /// <param name="cursor">Continuation cursor</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <param name="limit">Maximum number of related objects to retrieve</param>
+    /// <returns>JSON string</returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<string> GetRelatedDescriptors(string classObjectApiValue, string relationship, string? cursor, 
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        var parameters = new { limit, cursor };
+        var requestUrl = $"{classObjectApiValue}/relationships/{relationship}";
+        
+        var request = new RestRequest(requestUrl).AddObject(parameters);
+        
+        var restResponse = await GetResponse(request, cancellationToken);
+
+        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+
+        return restResponse.Content!;
+    }
 }

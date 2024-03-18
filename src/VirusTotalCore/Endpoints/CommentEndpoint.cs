@@ -88,4 +88,10 @@ public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
         var restResponse = await PostResponse(request, cancellationToken);
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
+
+    public override async Task<string> GetRelatedObjects(string commentId, string relationship, string? cursor,
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        return await base.GetRelatedObjects(commentId, relationship, cursor, cancellationToken, limit);
+    }
 }

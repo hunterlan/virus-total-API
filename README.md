@@ -1,5 +1,6 @@
-![VirusTotalCore logo](assets/VTC_header.png)
 [![.NET](https://github.com/hunterlan/VirusTotalCore/actions/workflows/dotnet.yml/badge.svg)](https://github.com/hunterlan/VirusTotalCore/actions/workflows/dotnet.yml)
+
+![VirusTotalCore logo](assets/VTC_header.png)
 # VirusTotalCore
 VirusTotalCore is an unofficial .NET library that gives a possibility to work with VirusTotal by implemented API. With this library, 
 developers can request scans for URLs, files, get report about domains and IPs, retrieve comments and votes from 

@@ -117,16 +117,6 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         return result;
     }
 
-    public void GetObjectsRelated()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void GetObjectDescription()
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Get votes on URL.
     /// </summary>
@@ -177,6 +167,12 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
 
         var restResponse = await PostResponse(request, cancellationToken);
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+    }
+
+    public override async Task<string> GetRelatedObjects(string id, string relationship, string? cursor,
+        CancellationToken? cancellationToken, int limit = 10)
+    {
+        return await base.GetRelatedObjects(id, relationship, cursor, cancellationToken, limit);
     }
 
     private static string ToBase64String(string plainText) 

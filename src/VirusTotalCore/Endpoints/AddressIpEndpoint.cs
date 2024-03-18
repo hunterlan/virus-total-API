@@ -94,18 +94,6 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
         if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
     }
 
-    //TODO: Get objects related to an IP Address
-    public void GetRelatedObjects(string ipAddress)
-    {
-        throw new NotImplementedException();
-    }
-
-    //TODO: Get objects descriptors related to an IP Address
-    public void GetRelatedDescriptors(string ipAddress)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     ///     Get community votes for given IP address.
     /// </summary>

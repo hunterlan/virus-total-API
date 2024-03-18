@@ -399,4 +399,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .idea/
+# Developer files
 Dockerfile
+nuget.config

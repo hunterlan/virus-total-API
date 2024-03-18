@@ -7,6 +7,7 @@ namespace VirusTotalCore.Tests;
 public class IpAddressTest
 {
     private const string IpAddress = "8.8.8.8";
+    private const string GraphRelationship = "graphs";
     private string ApiKey { get; }
     private readonly AddressIpEndpoint _endpoint;
 
@@ -58,14 +59,39 @@ public class IpAddressTest
     public async Task DuplicateErrorPostComment()
     {
         await Assert.ThrowsAsync<AlreadyExistsException>(() =>
-            _endpoint.AddComment("8.8.8.8", "Lorem ipsum dolor sit ...", new CancellationToken()));
+            _endpoint.AddComment(IpAddress, "Lorem ipsum dolor sit ...", new CancellationToken()));
     }
     
-    /*
-     * TODO: Write test for posting comment
-     * Find a way to delete the comment
-     */
-    
+    [Fact]
+    public async Task AddCommentTest()
+    {
+        var comment = "This is test comment for VirusTotalCore library";
+        var cancellationToken = new CancellationToken();
+        var commentEndpoint = new CommentEndpoint(ApiKey);
+        
+        await _endpoint.AddComment(IpAddress, comment, cancellationToken);
+        var commentData = await _endpoint.GetComments(IpAddress, null, cancellationToken);
+        var publishedComment = commentData.Comments.First();
+        Assert.Equal(comment, publishedComment.Attributes.Text);
+        
+        var commentId = publishedComment.Id;
+        await commentEndpoint.Delete(commentId, cancellationToken);
+    }
+
+    [Fact]
+    public async Task GetRelationshipsTest()
+    {
+        var relatedObjectsJson = await _endpoint.GetRelatedObjects(IpAddress, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
+    }
+
+    [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await _endpoint.GetRelatedDescriptors(IpAddress, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
+    }
+
     /*
      * TODO: Write test for posting vote
      * Find a way to delete the vote

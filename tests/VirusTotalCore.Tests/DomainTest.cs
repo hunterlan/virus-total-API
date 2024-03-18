@@ -1,11 +1,13 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic;
 using VirusTotalCore.Endpoints;
 
 namespace VirusTotalCore.Tests;
 
 public class DomainTest
 {
-    private const string IpAddress = "8.8.8.8";
+    private const string GoogleDomain = "google.com";
+    private const string GraphRelationship = "graphs";
     private string ApiKey { get; }
     private readonly DomainsEndpoint _endpoint;
 
@@ -30,8 +32,7 @@ public class DomainTest
     [Fact]
     public async Task TestGetCommentsDomainReport()
     {
-        const string domain = "google.com";
-        var comments = await _endpoint.GetComments(domain, new CancellationToken(), null, 10);
+        var comments = await _endpoint.GetComments(GoogleDomain, new CancellationToken(), null, 10);
         Assert.True(comments.Comments.Count() is 10);
     }
     
@@ -40,11 +41,24 @@ public class DomainTest
     {
         var cancellationToken = new CancellationToken();
         var commentEndpoint = new CommentEndpoint(ApiKey);
-        const string domain = "google.com";
         const string comment = "It's google and it's safe";
-        var commentResult = await _endpoint.AddComment(domain, comment, cancellationToken);
+        var commentResult = await _endpoint.AddComment(GoogleDomain, comment, cancellationToken);
         Assert.True(string.Equals(commentResult.Attributes.Text, comment));
         await commentEndpoint.Delete(commentResult.Id, cancellationToken);
+    }
+    
+    [Fact]
+    public async Task GetRelationshipsTest()
+    {
+        var relatedObjectsJson = await _endpoint.GetRelatedObjects(GoogleDomain, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(relatedObjectsJson));
+    }
+
+    [Fact]
+    public async Task GetDescriptorsTest() 
+    {
+        var descriptorsJson = await _endpoint.GetRelatedDescriptors(GoogleDomain, GraphRelationship, null, null);
+        Assert.True(!string.IsNullOrEmpty(descriptorsJson));
     }
     
     /*
