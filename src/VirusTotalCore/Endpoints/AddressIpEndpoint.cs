@@ -9,8 +9,8 @@ namespace VirusTotalCore.Endpoints;
 
 public class AddressIpEndpoint : BaseEndpoint
 {
-    public AddressIpEndpoint(string apiKey) : base(apiKey, "files/") { }
-    public AddressIpEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
+    public AddressIpEndpoint(string apiKey) : base(apiKey, "ip_addresses/") { }
+    public AddressIpEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "ip_addresses/") { }
     /// <summary>
     ///     Get report on given ip address
     /// </summary>

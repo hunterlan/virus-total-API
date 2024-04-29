@@ -8,8 +8,8 @@ namespace VirusTotalCore.Endpoints;
 
 public class DomainsEndpoint : BaseEndpoint
 {
-    public DomainsEndpoint(string apiKey) : base(apiKey, "files/") { }
-    public DomainsEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
+    public DomainsEndpoint(string apiKey) : base(apiKey, "domains/") { }
+    public DomainsEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "domains/") { }
     /// <summary>
     /// Get report about specific domain
     /// </summary>
