@@ -1,6 +1,3 @@
-using System.Net.Http.Json;
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models.Analysis;
@@ -21,17 +18,8 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<AnalysisReport<AddressReportAttributes>> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
-        var response = await HttpClient.GetAsync(ipAddress, cancellationToken: cancellationToken ?? new CancellationToken());
-        var resultJson = await response.Content.ReadAsStringAsync();
-        if (response is not { IsSuccessStatusCode: true })
-        {
-            throw HandleError(resultJson);
-        }
-
-        var resultJsonDocument = JsonDocument.Parse(resultJson);
-        var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AnalysisReport<AddressReportAttributes>>(JsonSerializerOptions)!;
-        return result;
+        const string rootPropertyName = "data";
+        return await GetAsync<AnalysisReport<AddressReportAttributes>>(ipAddress, rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -54,16 +42,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
             requestUrl += $"&cursor={cursor}";
         }
 
-        var response = await HttpClient.GetAsync(requestUrl, cancellationToken ?? new CancellationToken());
-        var resultJson = await response.Content.ReadAsStringAsync();
-        if (response is not { IsSuccessStatusCode: true })
-        {
-            throw HandleError(resultJson);
-        }
-        
-        var resultJsonDocument = JsonDocument.Parse(resultJson);
-        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<CommentData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -81,12 +60,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
         var newComment = new AddComment(comment);
         var requestUrl = $"{ipAddress}/comments";
 
-        var response = await HttpClient.PostAsJsonAsync(requestUrl, newComment, cancellationToken ?? new CancellationToken());
-        var resultJson = await response.Content.ReadAsStringAsync();
-        if (response is not { IsSuccessStatusCode: true })
-        {
-            throw HandleError(resultJson);
-        }
+        await PostAsync(requestUrl, newComment, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -98,28 +72,8 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<VoteData> GetVotes(string ipAddress, CancellationToken? cancellationToken)
     {
-        /*var requestUrl = $"/{ipAddress}/votes";
-
-        var request = new RestRequest(requestUrl);
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
-        return result;*/
-
         var requestUrl = $"{ipAddress}/votes";
-        var response = await HttpClient.GetAsync(requestUrl, cancellationToken ?? new CancellationToken());
-        var resultJson = await response.Content.ReadAsStringAsync();
-        if (response is not { IsSuccessStatusCode: true })
-        {
-            throw HandleError(resultJson);
-        }
-        
-        var resultJsonDocument = JsonDocument.Parse(resultJson);
-        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<VoteData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -133,25 +87,9 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task AddVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        /*var newVote = new AddVote(verdict);
-
-        var requestUrl = $"/{ipAddress}/votes";
-        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);*/
-        
-        
         var newVote = new AddVote(verdict);
         var requestUrl = $"/{ipAddress}/votes";
         
-        var response = await HttpClient.PostAsJsonAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
-        var resultJson = await response.Content.ReadAsStringAsync();
-        if (response is not { IsSuccessStatusCode: true })
-        {
-            throw HandleError(resultJson);
-        }
+        await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }
 }

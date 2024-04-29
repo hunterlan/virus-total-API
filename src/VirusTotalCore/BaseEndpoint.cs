@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
 using RestSharp;
 using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models;
@@ -91,6 +92,44 @@ public abstract class BaseEndpoint
         return cancellationToken is not null
             ? Client.ExecutePostAsync(request, cancellationToken.Value)
             : Client.ExecutePostAsync(request);
+    }
+
+    protected async Task<T> GetAsync<T>(string requestUrl, CancellationToken cancellationToken)
+    {
+        var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.Deserialize<T>(JsonSerializerOptions)!;
+        return result;
+    }
+
+    protected async Task<T> GetAsync<T>(string requestUrl, string jsonRootName, CancellationToken cancellationToken)
+    {
+        var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.RootElement.GetProperty(jsonRootName).Deserialize<T>(JsonSerializerOptions)!;
+        return result;
+    }
+
+    protected async Task PostAsync(string requestUrl, object value, CancellationToken cancellationToken)
+    {
+        var response = await HttpClient.PostAsJsonAsync(requestUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
     }
 
     protected Task<RestResponse> PostFormResponse(RestRequest request, CancellationToken? cancellationToken)
