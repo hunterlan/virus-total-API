@@ -69,17 +69,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     /// <exception cref="Exception"></exception>
     public async Task<Comment> AddComment(string domain, string comment, CancellationToken? cancellationToken)
     {
-        var newComment = new AddComment
-        {
-            Data = new AddData<AddCommentAttribute>
-            {
-                Type = "comment",
-                Attributes = new AddCommentAttribute
-                {
-                    Text = comment
-                }
-            }
-        };
+        var newComment = new AddComment(comment);
         var requestUrl = $"/{domain}/comments";
 
         var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
@@ -129,17 +119,7 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     /// <exception cref="Exception"></exception>
     public async Task AddVote(string domain, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        var newVote = new AddVote
-        {
-            Data = new AddData<AddVoteAttribute>
-            {
-                Type = "vote",
-                Attributes = new AddVoteAttribute
-                {
-                    Verdict = verdict.ToString().ToLower()
-                }
-            }
-        };
+        var newVote = new AddVote(verdict);
 
         var requestUrl = $"/{domain}/votes";
         var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);

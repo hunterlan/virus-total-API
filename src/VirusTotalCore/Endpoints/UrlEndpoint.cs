@@ -93,17 +93,7 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     /// <exception cref="Exception"></exception>
     public async Task<Comment> AddComment(string id, string comment, CancellationToken? cancellationToken)
     {
-        var newComment = new AddComment
-        {
-            Data = new AddData<AddCommentAttribute>
-            {
-                Type = "comment",
-                Attributes = new AddCommentAttribute
-                {
-                    Text = comment
-                }
-            }
-        };
+        var newComment = new AddComment(comment);
         
         var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
         var request = new RestRequest($"/{id}/comments")
@@ -148,17 +138,7 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     /// <exception cref="Exception"></exception>
     public async Task AddVote(string id, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        var newVote = new AddVote
-        {
-            Data = new AddData<AddVoteAttribute>
-            {
-                Type = "vote",
-                Attributes = new AddVoteAttribute
-                {
-                    Verdict = verdict.ToString().ToLower()
-                }
-            }
-        };
+        var newVote = new AddVote(verdict);
 
         var requestUrl = $"/{id}/votes";
         var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);

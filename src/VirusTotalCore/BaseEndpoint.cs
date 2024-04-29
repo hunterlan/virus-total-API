@@ -7,14 +7,20 @@ namespace VirusTotalCore;
 
 public abstract class BaseEndpoint
 {
+    protected readonly HttpClient HttpClient;
     protected readonly RestClient Client;
-    private readonly string _url = "https://www.virustotal.com/api/v3";
+    private readonly string _url = "https://www.virustotal.com/api/v3/";
     private readonly string _apiKey = null!;
 
     public BaseEndpoint(string apiKey, string endpoint)
     {
         _url += endpoint;
         ApiKey = apiKey;
+        HttpClient = new HttpClient
+        {
+            BaseAddress = new Uri(_url),
+        };
+        HttpClient.DefaultRequestHeaders.Add("x-apikey", ApiKey);
         var options = new RestClientOptions(_url);
         Client = new RestClient(options);
         Client.AddDefaultHeader("x-apikey", ApiKey);
