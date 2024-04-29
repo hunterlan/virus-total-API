@@ -1,8 +1,5 @@
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Comments.Vote;
-using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
@@ -10,8 +7,10 @@ namespace VirusTotalCore.Endpoints;
 /// Get comments, delete own comments or add votes to comment.
 /// </summary>
 /// <param name="apiKey">User's API key</param>
-public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "comments/")
+public class CommentEndpoint : BaseEndpoint
 {
+    public CommentEndpoint(string apiKey) : base(apiKey, "files/") { }
+    public CommentEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
     /// <summary>
     /// This endpoint retrieves information about the latest comments added to VirusTotal.
     /// </summary>

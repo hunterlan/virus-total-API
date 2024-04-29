@@ -1,16 +1,15 @@
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.Domains;
 using VirusTotalCore.Models.Comments;
-using VirusTotalCore.Models.Shared;
 using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
-public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "domains/")
+public class DomainsEndpoint : BaseEndpoint
 {
+    public DomainsEndpoint(string apiKey) : base(apiKey, "files/") { }
+    public DomainsEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
     /// <summary>
     /// Get report about specific domain
     /// </summary>

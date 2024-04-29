@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using RestSharp;
 using VirusTotalCore.Endpoints;
 using Xunit.Abstractions;
 

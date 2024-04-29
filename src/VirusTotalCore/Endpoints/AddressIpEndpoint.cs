@@ -7,8 +7,10 @@ using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
-public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_addresses/")
+public class AddressIpEndpoint : BaseEndpoint
 {
+    public AddressIpEndpoint(string apiKey) : base(apiKey, "files/") { }
+    public AddressIpEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
     /// <summary>
     ///     Get report on given ip address
     /// </summary>

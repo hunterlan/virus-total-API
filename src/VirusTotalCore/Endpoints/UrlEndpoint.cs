@@ -1,10 +1,7 @@
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.URL;
 using VirusTotalCore.Models.Comments;
-using VirusTotalCore.Models.Shared;
 using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
@@ -13,8 +10,10 @@ namespace VirusTotalCore.Endpoints;
 /// Analyse URLs, get reports, comments and votes about it and owns.
 /// </summary>
 /// <param name="apiKey">User's API key.</param>
-public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "urls/")
+public class UrlEndpoint : BaseEndpoint
 {
+    public UrlEndpoint(string apiKey) : base(apiKey, "files/") { }
+    public UrlEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files/") { }
     // TODO: Rewrite it
     /// <summary>
     /// Request to scan URL. 
