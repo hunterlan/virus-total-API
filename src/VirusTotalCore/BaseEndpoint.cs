@@ -96,7 +96,7 @@ public abstract class BaseEndpoint
 
     protected async Task<T> GetAsync<T>(string requestUrl, CancellationToken cancellationToken)
     {
-        var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
+        using var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
         var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
         if (response is not { IsSuccessStatusCode: true })
         {
@@ -110,7 +110,7 @@ public abstract class BaseEndpoint
 
     protected async Task<T> GetAsync<T>(string requestUrl, string jsonRootName, CancellationToken cancellationToken)
     {
-        var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
+        using var response = await HttpClient.GetAsync(requestUrl, cancellationToken);
         var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
         if (response is not { IsSuccessStatusCode: true })
         {
@@ -122,6 +122,16 @@ public abstract class BaseEndpoint
         return result;
     }
 
+    protected async Task DeleteAsync(string requestUrl, CancellationToken cancellationToken)
+    {
+        using var response = await HttpClient.DeleteAsync(requestUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+    }
+
     protected async Task PostAsync(string requestUrl, object value, CancellationToken cancellationToken)
     {
         var response = await HttpClient.PostAsJsonAsync(requestUrl, value, cancellationToken);
@@ -130,25 +140,6 @@ public abstract class BaseEndpoint
         {
             throw HandleError(resultJson);
         }
-    }
-
-    protected Task<RestResponse> PostFormResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        return cancellationToken is not null
-            ? Client.ExecuteAsync(request, cancellationToken.Value)
-            : Client.ExecuteAsync(request);
-    }
-
-    protected Task<RestResponse> DeleteResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        if (request.Method is not Method.Delete)
-        {
-            throw new ArgumentException("Request method has to be DELETE!");
-        }
-
-        return cancellationToken is not null
-            ? Client.ExecuteAsync(request, cancellationToken.Value)
-            : Client.ExecuteAsync(request);
     }
 
     /// <summary>
