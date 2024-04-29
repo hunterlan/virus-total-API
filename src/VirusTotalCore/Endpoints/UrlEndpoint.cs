@@ -13,8 +13,9 @@ namespace VirusTotalCore.Endpoints;
 /// Analyse URLs, get reports, comments and votes about it and owns.
 /// </summary>
 /// <param name="apiKey">User's API key.</param>
-public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
+public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "urls/")
 {
+    // TODO: Rewrite it
     /// <summary>
     /// Request to scan URL. 
     /// </summary>
@@ -28,7 +29,7 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
         var content = new MultipartFormDataContent();
         content.Add(new StringContent(url), "url");
         request.Content = content;
-        var response = await client.SendAsync(request);
+        using var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 
@@ -42,15 +43,8 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     public async Task<AnalysisReport<UrlReportAttributes>> GetReport(string url, CancellationToken? cancellationToken)
     {
         await Scan(url, cancellationToken);
-        var request = new RestRequest($"/{ToBase64String(url)}");
-        var restResponse = await GetResponse(request, cancellationToken);
-        
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AnalysisReport<UrlReportAttributes>>(JsonSerializerOptions)!;
-        return result;
+        const string rootPropertyName = "data";
+        return await GetAsync<AnalysisReport<UrlReportAttributes>>(ToBase64String(url), rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 
     public void Rescan(string id)
@@ -70,17 +64,13 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     public async Task<CommentData> GetComments(string id, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
-        var parameters = new { limit, cursor };
-        
-        var request = new RestRequest($"/{id}/comments").AddObject(parameters);
+        var requestUrl = $"{id}/comments?limit={limit}";
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
 
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<CommentData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -93,18 +83,11 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     /// <exception cref="Exception"></exception>
     public async Task<Comment> AddComment(string id, string comment, CancellationToken? cancellationToken)
     {
+        const string rootPropertyName = "data";
         var newComment = new AddComment(comment);
-        
-        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
-        var request = new RestRequest($"/{id}/comments")
-            .AddJsonBody(serializedJson);
+        var requestUrl = $"{id}/comments";
 
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-        
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<Comment>(JsonSerializerOptions)!;
-        return result;
+        return await PostAsync<Comment>(requestUrl, rootPropertyName, newComment, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -116,16 +99,8 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     /// <exception cref="Exception"></exception>
     public async Task<VoteData> GetVotes(string id, CancellationToken? cancellationToken)
     {
-        var requestUrl = $"/{id}/votes";
-
-        var request = new RestRequest(requestUrl);
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
-        return result;
+        var requestUrl = $"{id}/votes";
+        return await GetAsync<VoteData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     
@@ -139,14 +114,9 @@ public class UrlEndpoint(string apiKey) : BaseEndpoint(apiKey, "/urls")
     public async Task AddVote(string id, VerdictType verdict, CancellationToken? cancellationToken)
     {
         var newVote = new AddVote(verdict);
-
-        var requestUrl = $"/{id}/votes";
-        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        var requestUrl = $"{id}/votes";
+        
+        await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }
 
     public override async Task<string> GetRelatedObjects(string id, string relationship, string? cursor,
