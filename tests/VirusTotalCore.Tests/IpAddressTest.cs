@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using VirusTotalCore.Endpoints;
 using VirusTotalCore.Exceptions;
+using VirusTotalCore.Models.Comments;
 
 namespace VirusTotalCore.Tests;
 
@@ -66,16 +67,25 @@ public class IpAddressTest
     public async Task AddCommentTest()
     {
         var comment = "This is test comment for VirusTotalCore library";
+        Comment? publishedComment = null;
         var cancellationToken = new CancellationToken();
         var commentEndpoint = new CommentEndpoint(ApiKey);
         
         await _endpoint.AddComment(IpAddress, comment, cancellationToken);
-        var commentData = await _endpoint.GetComments(IpAddress, null, cancellationToken);
-        var publishedComment = commentData.Comments.First();
-        Assert.Equal(comment, publishedComment.Attributes.Text);
-        
-        var commentId = publishedComment.Id;
-        await commentEndpoint.Delete(commentId, cancellationToken);
+        try
+        {
+            var commentData = await _endpoint.GetComments(IpAddress, null, cancellationToken); 
+            publishedComment = commentData.Comments.First();
+            Assert.Equal(comment, publishedComment.Attributes.Text);
+        }
+        finally
+        {
+            if (publishedComment is not null)
+            {
+                var commentId = publishedComment.Id;
+                await commentEndpoint.Delete(commentId, cancellationToken);      
+            }
+        }
     }
 
     [Fact]
