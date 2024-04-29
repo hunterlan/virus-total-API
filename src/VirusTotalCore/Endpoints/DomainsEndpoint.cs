@@ -9,7 +9,7 @@ using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
-public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
+public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "domains/")
 {
     /// <summary>
     /// Get report about specific domain
@@ -19,16 +19,8 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     /// <returns cref="DomainReportAttributes">Analysis report</returns>
     public async Task<AnalysisReport<DomainReportAttributes>> GetReport(string domain, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{domain}");
-
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AnalysisReport<DomainReportAttributes>>(JsonSerializerOptions)!;
-        return result;
+        const string rootPropertyName = "data";
+        return await GetAsync<AnalysisReport<DomainReportAttributes>>(domain, rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -43,18 +35,13 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     public async Task<CommentData> GetComments(string domain, CancellationToken? cancellationToken, string? cursor, 
         int limit = 10)
     {
-        var finalResource = $"/{domain}/comments";
-        var parameters = new { limit, cursor };
+        var requestUrl = $"{domain}/comments?limit={limit}";
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
 
-        var request = new RestRequest(finalResource).AddObject(parameters);
-
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<CommentData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -69,19 +56,11 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     /// <exception cref="Exception"></exception>
     public async Task<Comment> AddComment(string domain, string comment, CancellationToken? cancellationToken)
     {
+        const string rootPropertyName = "data";
         var newComment = new AddComment(comment);
-        var requestUrl = $"/{domain}/comments";
+        var requestUrl = $"{domain}/comments";
 
-        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-        
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<Comment>(JsonSerializerOptions)!;
-        return result;
+        return await PostAsync<Comment>(requestUrl, rootPropertyName, newComment, cancellationToken ?? new CancellationToken());
     }
 
     public void GetDnsResolution()
@@ -98,16 +77,8 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     /// <exception cref="Exception"></exception>
     public async Task<VoteData> GetVotes(string domain, CancellationToken? cancellationToken)
     {
-        var requestUrl = $"/{domain}/votes";
-
-        var request = new RestRequest(requestUrl);
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
-        return result;
+        var requestUrl = $"{domain}/votes";
+        return await GetAsync<VoteData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -120,13 +91,8 @@ public class DomainsEndpoint(string apiKey) : BaseEndpoint(apiKey, "/domains")
     public async Task AddVote(string domain, VerdictType verdict, CancellationToken? cancellationToken)
     {
         var newVote = new AddVote(verdict);
-
-        var requestUrl = $"/{domain}/votes";
-        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        var requestUrl = $"{domain}/votes";
+        
+        await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }
 }

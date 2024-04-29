@@ -142,6 +142,34 @@ public abstract class BaseEndpoint
         }
     }
 
+    protected async Task<T> PostAsync<T>(string requestUrl, object value, CancellationToken cancellationToken)
+    {
+        var response = await HttpClient.PostAsJsonAsync(requestUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.Deserialize<T>(JsonSerializerOptions)!;
+        return result;
+    }
+    
+    protected async Task<T> PostAsync<T>(string requestUrl, string jsonRootName, object value, CancellationToken cancellationToken)
+    {
+        var response = await HttpClient.PostAsJsonAsync(requestUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.RootElement.GetProperty(jsonRootName).Deserialize<T>(JsonSerializerOptions)!;
+        return result;
+    }
+
     /// <summary>
     /// This endpoint allows to get objects relationship to another objects. 
     /// </summary>

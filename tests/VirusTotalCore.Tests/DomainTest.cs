@@ -43,8 +43,14 @@ public class DomainTest
         var commentEndpoint = new CommentEndpoint(ApiKey);
         const string comment = "It's google and it's safe";
         var commentResult = await _endpoint.AddComment(GoogleDomain, comment, cancellationToken);
-        Assert.True(string.Equals(commentResult.Attributes.Text, comment));
-        await commentEndpoint.Delete(commentResult.Id, cancellationToken);
+        try
+        {
+            Assert.True(string.Equals(commentResult.Attributes.Text, comment));
+        }
+        finally
+        {
+            await commentEndpoint.Delete(commentResult.Id, cancellationToken);   
+        }
     }
     
     [Fact]

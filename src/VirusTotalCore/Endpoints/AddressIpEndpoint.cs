@@ -88,7 +88,7 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "ip_address
     public async Task AddVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
         var newVote = new AddVote(verdict);
-        var requestUrl = $"/{ipAddress}/votes";
+        var requestUrl = $"{ipAddress}/votes";
         
         await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }

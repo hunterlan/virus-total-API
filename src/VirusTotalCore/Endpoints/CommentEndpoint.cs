@@ -10,7 +10,7 @@ namespace VirusTotalCore.Endpoints;
 /// Get comments, delete own comments or add votes to comment.
 /// </summary>
 /// <param name="apiKey">User's API key</param>
-public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments/")
+public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "comments/")
 {
     /// <summary>
     /// This endpoint retrieves information about the latest comments added to VirusTotal.
