@@ -12,8 +12,8 @@ namespace VirusTotalCore.Endpoints;
 /// <param name="apiKey">User's API key.</param>
 public class UrlEndpoint : BaseEndpoint
 {
-    public UrlEndpoint(string apiKey) : base(apiKey, "urls/") { }
-    public UrlEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "urls/") { }
+    public UrlEndpoint(string apiKey) : base(apiKey, "urls") { }
+    public UrlEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "urls") { }
     // TODO: Rewrite it
     /// <summary>
     /// Request to scan URL. 

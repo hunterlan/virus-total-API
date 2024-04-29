@@ -9,8 +9,8 @@ namespace VirusTotalCore.Endpoints;
 /// <param name="apiKey">User's API key</param>
 public class CommentEndpoint : BaseEndpoint
 {
-    public CommentEndpoint(string apiKey) : base(apiKey, "comments/") { }
-    public CommentEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "comments/") { }
+    public CommentEndpoint(string apiKey) : base(apiKey, "comments") { }
+    public CommentEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "comments") { }
     /// <summary>
     /// This endpoint retrieves information about the latest comments added to VirusTotal.
     /// </summary>
