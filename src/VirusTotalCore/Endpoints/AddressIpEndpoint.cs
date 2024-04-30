@@ -1,17 +1,16 @@
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Enums;
 using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.IP;
 using VirusTotalCore.Models.Comments;
-using VirusTotalCore.Models.Shared;
 using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
-public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addresses")
+public class AddressIpEndpoint : BaseEndpoint
 {
+    public AddressIpEndpoint(string apiKey) : base(apiKey, "ip_addresses") { }
+    public AddressIpEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "ip_addresses") { }
     /// <summary>
     ///     Get report on given ip address
     /// </summary>
@@ -21,16 +20,8 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<AnalysisReport<AddressReportAttributes>> GetReport(string ipAddress, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{ipAddress}");
-
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AnalysisReport<AddressReportAttributes>>(JsonSerializerOptions)!;
-        return result;
+        const string rootPropertyName = "data";
+        return await GetAsync<AnalysisReport<AddressReportAttributes>>(ipAddress, rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -47,18 +38,13 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     public async Task<CommentData> GetComments(string ipAddress, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
-        var parameters = new { limit, cursor };
-        var requestUrl = $"/{ipAddress}/comments";
+        var requestUrl = $"{ipAddress}/comments?limit={limit}";
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
 
-        var request = new RestRequest(requestUrl).AddObject(parameters);
-
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<CommentData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -73,25 +59,10 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="AlreadyExistsException">Comment with given content is already exists.</exception>
     public async Task AddComment(string ipAddress, string comment, CancellationToken? cancellationToken)
     {
-        var newComment = new AddComment
-        {
-            Data = new AddData<AddCommentAttribute>
-            {
-                Type = "comment",
-                Attributes = new AddCommentAttribute
-                {
-                    Text = comment
-                }
-            }
-        };
-        var requestUrl = $"/{ipAddress}/comments";
+        var newComment = new AddComment(comment);
+        var requestUrl = $"{ipAddress}/comments";
 
-        var serializedJson = JsonSerializer.Serialize(newComment, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        await PostAsync(requestUrl, newComment, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -103,16 +74,8 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task<VoteData> GetVotes(string ipAddress, CancellationToken? cancellationToken)
     {
-        var requestUrl = $"/{ipAddress}/votes";
-
-        var request = new RestRequest(requestUrl);
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<VoteData>(JsonSerializerOptions)!;
-        return result;
+        var requestUrl = $"{ipAddress}/votes";
+        return await GetAsync<VoteData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -126,24 +89,9 @@ public class AddressIpEndpoint(string apiKey) : BaseEndpoint(apiKey, "/ip_addres
     /// <exception cref="NotFoundException">Given IP address not found.</exception>
     public async Task AddVote(string ipAddress, VerdictType verdict, CancellationToken? cancellationToken)
     {
-        var newVote = new AddVote
-        {
-            Data = new AddData<AddVoteAttribute>
-            {
-                Type = "vote",
-                Attributes = new AddVoteAttribute
-                {
-                    Verdict = verdict.ToString().ToLower()
-                }
-            }
-        };
-
-        var requestUrl = $"/{ipAddress}/votes";
-        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        var newVote = new AddVote(verdict);
+        var requestUrl = $"{ipAddress}/votes";
+        
+        await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }
 }

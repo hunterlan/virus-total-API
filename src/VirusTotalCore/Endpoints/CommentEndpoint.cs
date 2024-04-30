@@ -1,8 +1,5 @@
-using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Models.Comments;
 using VirusTotalCore.Models.Comments.Vote;
-using VirusTotalCore.Models.Votes;
 
 namespace VirusTotalCore.Endpoints;
 
@@ -10,8 +7,10 @@ namespace VirusTotalCore.Endpoints;
 /// Get comments, delete own comments or add votes to comment.
 /// </summary>
 /// <param name="apiKey">User's API key</param>
-public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
+public class CommentEndpoint : BaseEndpoint
 {
+    public CommentEndpoint(string apiKey) : base(apiKey, "comments") { }
+    public CommentEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "comments") { }
     /// <summary>
     /// This endpoint retrieves information about the latest comments added to VirusTotal.
     /// </summary>
@@ -24,17 +23,18 @@ public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
     public async Task<CommentData> GetLatest(string? filter, string? cursor, CancellationToken? cancellationToken,
         int limit = 10)
     {
-        var parameters = new { limit, filter, cursor };
+        var requestUrl = $"?limit={limit}";
+        if (filter is not null)
+        {
+            requestUrl += $"&filter={filter}";
+        }
 
-        var request = new RestRequest().AddObject(parameters);
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
 
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.Deserialize<CommentData>(JsonSerializerOptions)!;
-        return result;
+        return await GetAsync<CommentData>(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -45,15 +45,9 @@ public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
     /// <returns>Specified comment.</returns>
     public async Task<Comment> Get(string commentId, CancellationToken? cancellationToken)
     {
-        var requestUrl = $"/{commentId}";
-        var request = new RestRequest(requestUrl);
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var result = resultJsonDocument.RootElement.GetProperty("data").Deserialize<Comment>(JsonSerializerOptions)!;
-        return result;
+        const string rootPropertyName = "data";
+        var requestUrl = $"{commentId}";
+        return await GetAsync<Comment>(requestUrl, rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -63,11 +57,8 @@ public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
     /// <param name="cancellationToken">Cancellation token</param>
     public async Task Delete(string commentId, CancellationToken? cancellationToken)
     {
-        var requestUrl = $"/{commentId}";
-        var request = new RestRequest(requestUrl, Method.Delete);
-        var restResponse = await DeleteResponse(request, cancellationToken);
-
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        var requestUrl = $"{commentId}";
+        await DeleteAsync(requestUrl, cancellationToken ?? new CancellationToken());
     }
 
     /// <summary>
@@ -79,14 +70,9 @@ public class CommentEndpoint(string apiKey) : BaseEndpoint(apiKey, "/comments")
     public async Task AddVote(string commentId, CommentVerdict verdict, CancellationToken? cancellationToken)
     {
         var newVote = new { Data = verdict.ToString().ToLower() };
-
-        var requestUrl = $"/{commentId}/vote";
-        var serializedJson = JsonSerializer.Serialize(newVote, JsonSerializerOptions);
-        var request = new RestRequest(requestUrl)
-            .AddJsonBody(serializedJson);
-
-        var restResponse = await PostResponse(request, cancellationToken);
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        var requestUrl = $"{commentId}/vote";
+        
+        await PostAsync(requestUrl, newVote, cancellationToken ?? new CancellationToken());
     }
 
     public override async Task<string> GetRelatedObjects(string commentId, string relationship, string? cursor,

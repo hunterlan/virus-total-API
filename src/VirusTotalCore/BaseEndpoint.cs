@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using RestSharp;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
 using VirusTotalCore.Exceptions;
 using VirusTotalCore.Models;
 
@@ -7,23 +7,36 @@ namespace VirusTotalCore;
 
 public abstract class BaseEndpoint
 {
-    protected readonly RestClient Client;
-    private readonly string _url = "https://www.virustotal.com/api/v3";
+    protected readonly HttpClient HttpClient;
+    protected readonly string CurrentEndpointName;
     private readonly string _apiKey = null!;
-
-    public BaseEndpoint(string apiKey, string endpoint)
-    {
-        _url += endpoint;
-        ApiKey = apiKey;
-        var options = new RestClientOptions(_url);
-        Client = new RestClient(options);
-        Client.AddDefaultHeader("x-apikey", ApiKey);
-    }
     
+    private const string Url = "https://www.virustotal.com/api/v3/";
+
+    protected BaseEndpoint(string apiKey, string endpoint)
+    {
+        CurrentEndpointName = endpoint;
+        ApiKey = apiKey;
+        HttpClient = new HttpClient
+        {
+            BaseAddress = new Uri(Url),
+        };
+        HttpClient.DefaultRequestHeaders.Add("x-apikey", ApiKey);
+    }
+
+    protected BaseEndpoint(HttpClient customHttpClient, string apiKey, string endpoint)
+    {
+        CurrentEndpointName = endpoint;
+        ApiKey = apiKey;
+        HttpClient = customHttpClient;
+        HttpClient.BaseAddress = new Uri(Url);
+        HttpClient.DefaultRequestHeaders.Add("x-apikey", ApiKey);
+    }
+
     protected string ApiKey
     {
         get => _apiKey;
-        init
+        private init
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -34,7 +47,7 @@ public abstract class BaseEndpoint
         }
     }
 
-    protected readonly JsonSerializerOptions JsonSerializerOptions = new()
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -42,7 +55,7 @@ public abstract class BaseEndpoint
     };
 
     // https://docs.virustotal.com/reference/errors
-    protected static Exception ThrowErrorResponseException(ErrorResponse error)
+    private static Exception ThrowErrorResponseException(ErrorResponse error)
     {
         return error.Code switch
         {
@@ -69,41 +82,90 @@ public abstract class BaseEndpoint
     protected Exception HandleError(string errorContent)
     {
         var errorJsonDocument = JsonDocument.Parse(errorContent);
-        var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>(JsonSerializerOptions)!;
+        var errorResponse = errorJsonDocument.RootElement.GetProperty("error").Deserialize<ErrorResponse>(_jsonSerializerOptions)!;
         return ThrowErrorResponseException(errorResponse);
     }
 
-    protected Task<RestResponse> GetResponse(RestRequest request, CancellationToken? cancellationToken)
+    protected async Task<T> GetAsync<T>(string requestUrl, CancellationToken cancellationToken)
     {
-        return cancellationToken is not null
-            ? Client.ExecuteGetAsync(request, cancellationToken.Value)
-            : Client.ExecuteGetAsync(request);
-    }
-
-    protected Task<RestResponse> PostResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        return cancellationToken is not null
-            ? Client.ExecutePostAsync(request, cancellationToken.Value)
-            : Client.ExecutePostAsync(request);
-    }
-
-    protected Task<RestResponse> PostFormResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        return cancellationToken is not null
-            ? Client.ExecuteAsync(request, cancellationToken.Value)
-            : Client.ExecuteAsync(request);
-    }
-
-    protected Task<RestResponse> DeleteResponse(RestRequest request, CancellationToken? cancellationToken)
-    {
-        if (request.Method is not Method.Delete)
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        using var response = await HttpClient.GetAsync(finalUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
         {
-            throw new ArgumentException("Request method has to be DELETE!");
+            throw HandleError(resultJson);
         }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.Deserialize<T>(_jsonSerializerOptions)!;
+        return result;
+    }
 
-        return cancellationToken is not null
-            ? Client.ExecuteAsync(request, cancellationToken.Value)
-            : Client.ExecuteAsync(request);
+    protected async Task<T> GetAsync<T>(string requestUrl, string jsonRootName, CancellationToken cancellationToken)
+    {
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        using var response = await HttpClient.GetAsync(finalUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.RootElement.GetProperty(jsonRootName).Deserialize<T>(_jsonSerializerOptions)!;
+        return result;
+    }
+
+    protected async Task DeleteAsync(string requestUrl, CancellationToken cancellationToken)
+    {
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        using var response = await HttpClient.DeleteAsync(finalUrl, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+    }
+
+    protected async Task PostAsync(string requestUrl, object value, CancellationToken cancellationToken)
+    {        
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        var response = await HttpClient.PostAsJsonAsync(finalUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+    }
+
+    protected async Task<T> PostAsync<T>(string requestUrl, object value, CancellationToken cancellationToken)
+    {
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        var response = await HttpClient.PostAsJsonAsync(finalUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.Deserialize<T>(_jsonSerializerOptions)!;
+        return result;
+    }
+    
+    protected async Task<T> PostAsync<T>(string requestUrl, string jsonRootName, object value, CancellationToken cancellationToken)
+    {
+        var finalUrl = BuildRelativeUrl(requestUrl);
+        var response = await HttpClient.PostAsJsonAsync(finalUrl, value, cancellationToken);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.RootElement.GetProperty(jsonRootName).Deserialize<T>(_jsonSerializerOptions)!;
+        return result;
     }
 
     /// <summary>
@@ -119,16 +181,20 @@ public abstract class BaseEndpoint
     public virtual async Task<string> GetRelatedObjects(string classObjectApiValue, string relationship, string? cursor, 
         CancellationToken? cancellationToken, int limit = 10)
     {
-        var parameters = new { limit, cursor };
-        var requestUrl = $"{classObjectApiValue}/{relationship}";
+        var requestUrl = $"{CurrentEndpointName}/{classObjectApiValue}/comments?limit={limit}";
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
         
-        var request = new RestRequest(requestUrl).AddObject(parameters);
-        
-        var restResponse = await GetResponse(request, cancellationToken);
+        using var response = await HttpClient.GetAsync(requestUrl, cancellationToken ?? new CancellationToken());
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken ?? new CancellationToken());
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
 
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
-
-        return restResponse.Content!;
+        return resultJson;
     }
 
     /// <summary>
@@ -144,15 +210,24 @@ public abstract class BaseEndpoint
     public async Task<string> GetRelatedDescriptors(string classObjectApiValue, string relationship, string? cursor, 
         CancellationToken? cancellationToken, int limit = 10)
     {
-        var parameters = new { limit, cursor };
-        var requestUrl = $"{classObjectApiValue}/relationships/{relationship}";
+        var requestUrl = $"{CurrentEndpointName}/{classObjectApiValue}/relationships/{relationship}?limit={limit}";
+        if (cursor is not null)
+        {
+            requestUrl += $"&cursor={cursor}";
+        }
         
-        var request = new RestRequest(requestUrl).AddObject(parameters);
-        
-        var restResponse = await GetResponse(request, cancellationToken);
+        using var response = await HttpClient.GetAsync(requestUrl, cancellationToken ?? new CancellationToken());
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken ?? new CancellationToken());
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
 
-        if (restResponse is { IsSuccessful: false }) throw HandleError(restResponse.Content!);
+        return resultJson;
+    }
 
-        return restResponse.Content!;
+    private string BuildRelativeUrl(string requestUrl)
+    {
+        return requestUrl.StartsWith('?') ? $"{CurrentEndpointName}{requestUrl}" : $"{CurrentEndpointName}/{requestUrl}";
     }
 }

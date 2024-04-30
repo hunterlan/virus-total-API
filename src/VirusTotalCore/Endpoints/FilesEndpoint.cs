@@ -1,6 +1,5 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json;
-using RestSharp;
 using VirusTotalCore.Models.Analysis;
 using VirusTotalCore.Models.Analysis.File;
 
@@ -10,8 +9,10 @@ namespace VirusTotalCore.Endpoints;
 /// Send files for scanning and get report about them.
 /// </summary>
 /// <param name="apiKey">User's API key.</param>
-public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
+public class FilesEndpoint : BaseEndpoint
 {
+    public FilesEndpoint(string apiKey) : base(apiKey, "files") { }
+    public FilesEndpoint(HttpClient customHttpClient, string apiKey) : base(customHttpClient, apiKey, "files") { }
     /// <summary>
     /// Size of file is allowed to post without requesting an URL for it (32 MB in bytes).
     /// </summary>
@@ -31,7 +32,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
         CancellationToken? cancellationToken)
     {
         cancellationToken ??= new CancellationToken();
-        var url = Client.Options.BaseUrl!.ToString();
+        var url = HttpClient.BaseAddress! + CurrentEndpointName;
 
         if (File.Exists(pathToFile))
         {
@@ -40,6 +41,8 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
 
             if (fileSizeBytes > MaxSmallSizeBytes)
             {
+                //https://github.com/aio-libs/aiohttp/issues/4678
+                //Exception: Malformed multipart body.
                 url = await GetUrlForPost(cancellationToken);
             }
         }
@@ -48,21 +51,30 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
             throw new FileNotFoundException($"Unable to find the specified file. Path is {pathToFile}");
         }
 
-        var localClient = new RestClient(url);
-        var request = new RestRequest("")
-            .AddHeader("x-apikey", ApiKey)
-            .AddFile("file", pathToFile, "multipart/form-data");
+        await using var sendStream = File.OpenRead(pathToFile);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+        using var content = new MultipartFormDataContent();
 
-        if (password is not null) request.AddJsonBody(JsonSerializer.Serialize(password));
-
-        var restResponse = await localClient.ExecutePostAsync(request, cancellationToken.Value);
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-
+        content.Add(new StreamContent(sendStream), "file", Path.GetFileName(sendStream.Name));
+        if (password is not null)
+        {
+            content.Add(new StringContent(password), "password");    
+        }
+        
+        requestMessage.Content = content;
+    
+        using var response = await HttpClient.SendAsync(requestMessage);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken.Value);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
         var sha256 = SHA256.Create();
         byte[] hashBytes;
-        await using (var stream = File.OpenRead(pathToFile))
+        await using (var localStream = File.OpenRead(pathToFile))
         {
-            hashBytes = await sha256.ComputeHashAsync(stream);
+            hashBytes = await sha256.ComputeHashAsync(localStream);
         }
         
         return System.Text.Encoding.Default.GetString(hashBytes);
@@ -76,13 +88,21 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
     /// <exception cref="Exception"></exception>
     private async Task<string> GetUrlForPost(CancellationToken? cancellationToken)
     {
-        var request = new RestRequest("/upload_url");
+        cancellationToken ??= new CancellationToken();
+        var requestUrl = "upload_url";
+        const string rootPropertyName = "data";
+        
+        using var response = await HttpClient.GetAsync(requestUrl, cancellationToken.Value);
+        var resultJson = await response.Content.ReadAsStringAsync(cancellationToken.Value);
+        if (response is not { IsSuccessStatusCode: true })
+        {
+            throw HandleError(resultJson);
+        }
+        
+        var resultJsonDocument = JsonDocument.Parse(resultJson);
+        var result = resultJsonDocument.RootElement.GetProperty(rootPropertyName).GetString()!;
 
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        return resultJsonDocument.RootElement.GetProperty("data").GetString()!;
+        return result;
     }
 
     /// <summary>
@@ -94,14 +114,7 @@ public class FilesEndpoint(string apiKey) : BaseEndpoint(apiKey, "/files")
     /// <exception cref="Exception"></exception>
     public async Task<AnalysisReport<FileReportAttributes>> GetReport(string fileHash, CancellationToken? cancellationToken)
     {
-        var request = new RestRequest($"/{fileHash}");
-
-        var restResponse = await GetResponse(request, cancellationToken);
-
-        if (restResponse is not { IsSuccessful: true }) throw HandleError(restResponse.Content!);
-        var resultJsonDocument = JsonDocument.Parse(restResponse.Content!);
-        var reportResult = resultJsonDocument.RootElement.GetProperty("data")
-            .Deserialize<AnalysisReport<FileReportAttributes>>(JsonSerializerOptions)!;
-        return reportResult;
+        const string rootPropertyName = "data";
+        return await GetAsync<AnalysisReport<FileReportAttributes>>(fileHash, rootPropertyName, cancellationToken ?? new CancellationToken());
     }
 }

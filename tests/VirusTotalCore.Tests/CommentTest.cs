@@ -34,11 +34,17 @@ public class CommentTest
     {
         var token = new CancellationToken();
         var exampleCommentData = await CreateComment(token);
-        var realCommentData = await _endpoint.Get(exampleCommentData.Id, token);
-        Assert.True(string.Equals(exampleCommentData.Id, realCommentData.Id) 
-                    && string.Equals(exampleCommentData.Attributes.Text, realCommentData.Attributes.Text)
-                    && exampleCommentData.Attributes.Date == realCommentData.Attributes.Date);
-        await _endpoint.Delete(exampleCommentData.Id, token);
+        try
+        {
+            var realCommentData = await _endpoint.Get(exampleCommentData.Id, token);
+            Assert.True(string.Equals(exampleCommentData.Id, realCommentData.Id) 
+                        && string.Equals(exampleCommentData.Attributes.Text, realCommentData.Attributes.Text)
+                        && exampleCommentData.Attributes.Date == realCommentData.Attributes.Date);
+        }
+        finally
+        {
+            await _endpoint.Delete(exampleCommentData.Id, token);   
+        }
     }
 
     [Fact]
@@ -46,10 +52,16 @@ public class CommentTest
     {
         var token = new CancellationToken();
         var commentData = await CreateComment(token);
-        await _endpoint.AddVote(commentData.Id, CommentVerdict.Positive, token);
-        var realCommentData = await _endpoint.Get(commentData.Id, token);
-        Assert.True(realCommentData.Attributes.Votes.Positive is 1);
-        await _endpoint.Delete(commentData.Id, token);
+        try
+        {
+            await _endpoint.AddVote(commentData.Id, CommentVerdict.Positive, token);
+            var realCommentData = await _endpoint.Get(commentData.Id, token);
+            Assert.True(realCommentData.Attributes.Votes.Positive is 1);
+        }
+        finally
+        {
+            await _endpoint.Delete(commentData.Id, token);   
+        }
     }
 
     private async Task<Comment> CreateComment(CancellationToken cancellationToken)
